@@ -1,0 +1,24 @@
+{
+    "python.pythonPath":"D:\\+USUARIOS_1\\OSCAR\\PROYECTOS\\Python\pyutils\\.conda\\python.exe",
+    "python.terminal.activateEnvironment": true,
+    "terminal.integrated.shell.windows": "C:\\Windows\\System32\\cmd.exe",
+    "python.condaPath": "c:\\Users\\Oscar\\miniconda3\\Scripts\\conda.exe",
+    "python.testing.unittestArgs": ["-v", "-s", "./tests", "-p", "test_*.py"],
+    "python.testing.pytestEnabled": false,
+    "python.testing.unittestEnabled": true,
+
+    "explorer.confirmDelete": false,
+    "explorer.confirmDragAndDrop": false,
+    "javascript.updateImportsOnFileMove.enabled": "always",
+
+    "editor.formatOnPaste": true,
+    "editor.formatOnSave": true,
+    "editor.defaultFormatter": "esbenp.prettier-vscode",
+    "[python]": {
+        "editor.defaultFormatter": "ms-python.autopep8",
+        "editor.formatOnSave": true
+    },
+    "autopep8.args": ["--max-line-length=120", "--ignore=E402"],
+    "editor.minimap.size": "fill",
+    "editor.minimap.scale": 1
+}
