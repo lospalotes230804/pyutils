@@ -1,5 +1,5 @@
 """
-This file contains functions for text processing.
+This file contains functions for text validation.
 Inspired in
 https://github.com/daveoncode/python-string-utils/blob/master/string_utils/validation.py
 """
@@ -7,13 +7,12 @@ https://github.com/daveoncode/python-string-utils/blob/master/string_utils/valid
 # Importing the required libraries
 import json
 import re
+import dateutil.parser as dtp
 from typing import Any, Optional, List
+from .._regex import *
+from ..errors import InvalidInputError
 
-from ._regex import *
-from .errors import InvalidInputError
-# from dateutil.parser import parse
-
-# Simple checks (basic checks)
+# Simple validations => basic string operations
 
 
 def is_string(obj: Any) -> bool:
@@ -100,7 +99,7 @@ def is_alphanumeric(input_string: str) -> bool:
     """
     return is_full_string(input_string) and input_string.isalnum()
 
-# Simple checks (basic checks)
+# Simple validations => data types (int, float, bool, datetime, ...)
 
 
 def is_number(input_string: str) -> bool:
@@ -166,8 +165,6 @@ def is_decimal(input_string: str) -> bool:
     """
     return is_number(input_string) and ',' in input_string
 
-# Simple checks (data types)
-
 
 def is_datetime(input_string: str, first) -> bool:
     """
@@ -182,31 +179,41 @@ def is_datetime(input_string: str, first) -> bool:
     :type input_string: str
     :return: True if datetime, false otherwise
     """
-    try:
-        datetime.datetime.strptime(input_string, '%Y-%m-%d %H:%M:%S')
-        return True
-    except ValueError:
-        return False
+    return is_full_string(input_string) and dtp.is_parseable(input_string)
 
+# def test_is_date(self):
 
-def is_date(input_string: str) -> bool:
-    """
-    Checks whether the given string represents a date or not.
-    """
-
-
-def is_time(input_string: str) -> bool:
-    """
-    Checks whether the given string represents a time or not.
-    """
+# def test_is_time(self):
 
 
 def is_bool(input_string: str) -> bool:
     """
     Checks whether the given string represents a boolean or not.
-    """
 
-# Specific strings
+    *Examples:*
+
+    >>> is_bool('true') # returns true
+    >>> is_bool('false') # returns true
+    >>> is_bool('True') # returns true
+    >>> is_bool('False') # returns true
+    >>> is_bool('yes') # returns true
+    >>> is_bool('no') # returns true
+    >>> is_bool('1') # returns true
+    >>> is_bool('0') # returns true
+    >>> is_bool('Si') # returns false
+    >>> is_bool('sí') # returns false
+    >>> is_bool('No') # returns false
+    >>> is_bool('') # returns false
+    >>> is_bool('foo') # returns false
+
+    :param input_string: String to check
+    :type input_string: str
+    :return: True if boolean, false otherwise
+    """
+    return (is_full_string(input_string) and input_string.lower() in
+            ('true', 'false', 'yes', 'no', 'si', 'sí', 'no', '1', '0'))
+
+# Specific validations => specific strings (paths, filenames, urls, ...)
 
 
 def is_path(input_string: str) -> bool:
@@ -224,7 +231,8 @@ def is_path(input_string: str) -> bool:
     :type input_string: str
     :return: True if path, false otherwise
     """
-    return is_full_string(input_string) and PATH_RE.match(input_string) is not None
+    return (is_full_string(input_string)
+            and PATH_RE.search(input_string) is not None)
 
 
 def is_filename(input_string: str) -> bool:
@@ -292,7 +300,8 @@ def is_hostname(input_string: str) -> bool:
     :type input_string: str
     :return: True if hostname, false otherwise
     """
-    return is_full_string(input_string) and HOSTNAME_RE.match(input_string) is not None
+    return (is_full_string(input_string)
+            and HOSTNAME_RE.match(input_string) is not None)
 
 
 def is_domain(input_string: str) -> bool:
@@ -322,6 +331,11 @@ def is_email(input_string: str) -> bool:
     >>> is_email('exa.mple@example.com.es') # returns true
     >>> is_email('exa-mple@example.com.es') # returns true
 
+    >>> is_email('example@example') # returns false
+    >>> is_email('example') # returns false
+    >>> is_email('example@') # returns false
+    >>> is_email('@example.com') # returns false
+
     :param input_string: String to check
     :type input_string: str
     :return: True if email, false otherwise
@@ -345,7 +359,7 @@ def is_password(input_string: str) -> bool:
     """
     return is_full_string(input_string) and PASSWORD_RE.match(input_string) is not None
 
-# Specific data structures
+# Specific validations => data structures (json, xml, ...)
 
 
 def is_json(input_string: str) -> bool:
@@ -388,4 +402,4 @@ def is_xml(input_string: str) -> bool:
     :type input_string: str
     :return: True if xml, false otherwise
     """
-    return False
+    return is_full_string(input_string) and XML_RE.match(input_string) is not None

@@ -1,18 +1,17 @@
 """
-This file contains functions for text processing.
+This file contains functions for datetime validation.
 Inspired in
 https://github.com/dateutil/dateutil/blob/master/src/dateutil/parser/_parser.py
 https://dateutil.readthedocs.io/en/stable/examples.html#parse-examples
 """
 
 # Importing the required libraries
-import os
-import sys
+import dateutil.parser as dtp
 from datetime import *
 sys.path.insert(1, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
-from dateutil.parser import *
-from dateutil.tz import *
-from datetime import *
+# from dateutil.parser import *
+# from dateutil.tz import *
+# from datetime import *
 
 
 def parse(input_string: str) -> datetime:
@@ -30,10 +29,12 @@ def parse(input_string: str) -> datetime:
     >>> parse("20030925") # returns datetime.datetime(2003, 9, 25, 0, 0)
 
     Everything together:
+
     >>> parse("199709020900") # returns datetime.datetime(1997, 9, 2, 9, 0)
     >>> parse("19970902090059") # returns datetime.datetime(1997, 9, 2, 9, 0, 59)
 
     Different date orderings:
+
     >>> parse("2003-09-25") # returns datetime.datetime(2003, 9, 25, 0, 0)
     >>> parse("2003-Sep-25") # returns datetime.datetime(2003, 9, 25, 0, 0)
     >>> parse("25-Sep-2003") # returns datetime.datetime(2003, 9, 25, 0, 0)
@@ -48,14 +49,17 @@ def parse(input_string: str) -> datetime:
     >>> parse("10-09-03", yearfirst=True) # returns datetime.datetime(2010, 9, 3, 0, 0)
 
     Other date separators are allowed:
+
     >>> parse("2003.Sep.25") # returns datetime.datetime(2003, 9, 25, 0, 0)
     >>> parse("2003/09/25") # returns datetime.datetime(2003, 9, 25, 0, 0)
 
     Even with spaces:
+
     >>> parse("2003 Sep 25") # returns datetime.datetime(2003, 9, 25, 0, 0)
     >>> parse("2003 09 25") # returns datetime.datetime(2003, 9, 25, 0, 0)
 
     Hours with letters work:
+
     >>> parse("10h36m28.5s", default=DEFAULT) # returns datetime.datetime(2003, 9, 25, 10, 36, 28, 500000)
     >>> parse("01s02h03m", default=DEFAULT) # returns datetime.datetime(2003, 9, 25, 2, 3, 1)
     >>> parse("01h02m03", default=DEFAULT) # returns datetime.datetime(2003, 9, 25, 1, 2, 3)
@@ -80,7 +84,8 @@ def parse(input_string: str) -> datetime:
     :param input_string: String to parse
     :return: datetime object
     """
-    return parse(input_string)
+    return dtp.parse(input_string)
+
 
 def is_parseable(input_string: str) -> bool:
     """
@@ -95,7 +100,6 @@ def is_parseable(input_string: str) -> bool:
             return True
         else:
             return False
-    except:
+    except ValueError as e:
+        print(e)
         return False
-    
-

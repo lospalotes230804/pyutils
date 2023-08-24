@@ -6,9 +6,9 @@ import re
 
 NUMBER_RE = re.compile(r'^([+\-]?)((\d+)(\,\d+)?(e\d+)?|\,\d+)$')
 
-PATH_RE = re.compile(r'^([a-z]:)?[\\/]+(?:[^\\/]+[\\/]+)*[^\\/]+$')
+PATH_RE = re.compile(r'^([a-zA-Z]:)?[\\/]+(?:[^\\/]+[\\/]+)*[^\\/]+$')
 
-FILENAME_RE = re.compile(r'^[a-zA-Z0-9áéíóúÁÉÍÓÚ \(\)\.,-]+$', re.IGNORECASE)
+FILENAME_RE = re.compile(r'^[a-zA-Z0-9áéíóúÁÉÍÓÚ \(\)\.,-]+\.[a-zA-Z]{2,}$', re.IGNORECASE)
 
 URLS_RAW_STRING = (
     r'([a-z-]+://)'  # scheme
@@ -38,7 +38,14 @@ EMAIL_RE = re.compile(r'^{}$'.format(EMAILS_RAW_STRING))
 
 EMAILS_RE = re.compile(r'({})'.format(EMAILS_RAW_STRING))
 
-PASSWORD_RE = re.compile(r'^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#$%^&*()\-_=+{}[\]|\\:;"\'<>,./?])(?=.{8,})')
+PASSWORD_RE = re.compile(r'^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.{8,})')
+
+# Minimum eight characters, at least one letter and one number:
+# PASSWORD_RE = re.compile(r'^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,}$')
+# Minimum eight characters, at least one letter lowercase, one letter uppercase, one number and one special character:
+# PASSWORD_RE = re.compile(r'^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z\d@$!%*#?&]{8,}$')
+# Minimum eight characters, at least one letter lowercase, one letter uppercase, one number and one special character (all characters):
+PASSWORD_RE = re.compile(r'^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()\-_=+{}[\]|\\:;"\'<>,./?])(?=.{8,})')
 
 CAMEL_CASE_TEST_RE = re.compile(r'^[a-zA-Z]*([a-z]+[A-Z]+|[A-Z]+[a-z]+)[a-zA-Z\d]*$')
 
@@ -80,6 +87,11 @@ HTML_RE = re.compile(
 
 HTML_TAG_ONLY_RE = re.compile(
     r'(<([a-z]+:)?[a-z]+[^>]*/?>|</([a-z]+:)?[a-z]+>|<!--.*-->|<!doctype.*>)',
+    re.IGNORECASE | re.MULTILINE | re.DOTALL
+)
+
+XML_RE = re.compile(
+    r'(<([a-z]+:)?[a-z]+[^>]*/?>)(.*?(</([a-z]+:)?[a-z]+>))?|<!--.*-->|<!doctype.*>',
     re.IGNORECASE | re.MULTILINE | re.DOTALL
 )
 
