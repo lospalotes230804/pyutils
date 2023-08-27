@@ -2,7 +2,17 @@
 
 ## Overview
 
-`pyutils` is a Python utility library that provides a collection of helpful functions and modules for common tasks, including string manipulation, date handling, file operations, and directory management.
+`pyutils` is a Python utility library that provides a collection of helpful functions and modules for common tasks with basic elements, such as:
+
+- String validation & manipulation
+- Date validation & manipulation
+- File validation & manipulation
+- Directory validation & manipulation
+- Database validation & manipulation (pending)
+- Server validation & manipulation (pending)
+- Internet validation & manipulation (pending)
+
+Inspired in https://github.com/daveoncode/python-utils
 
 ## Requirements
 
@@ -14,6 +24,7 @@ You can install pyutils using `pip`:
 
 ```bash
 pip install pyutils
+```
 
 ## Use cases
 
@@ -60,9 +71,7 @@ The pyutils.dir module provides directory-related functions for validation and m
 from pyutils import dir
 dir_contents = dir.list_directory_contents("path/to/directory")
 
-# Contributing
-
-Inspired partially in https://github.com/daveoncode/python-utils
+## Contributing
 
 Contributions are welcome! If you have any ideas, bug reports, or feature requests, please open an issue or submit a pull request.
 
