@@ -4,13 +4,12 @@ This file contains functions for processing files.
 
 # Importing the required libraries
 import os
-import sys
 import shutil
 import datetime as dt
 import utils.string.validate as str
 import utils.directory.validate as dir
 from utils.file.validate import is_file
-from utils.file.info import get_absolute_path, get_dir_path, get_extension, get_name
+from utils.file.info import get_absolute_path, get_parent_dir, get_extension, get_name
 
 # Constants
 DEFAULT_ENCODING = "utf-8"
@@ -237,7 +236,7 @@ def archive(path: str) -> str:
         # Get the timestamp
         timestamp = dt.datetime.now().strftime(DEFAULT_TIMESTAMP_FORMAT)
         new_name = get_name(path) + "-" + timestamp + get_extension(path)
-        new_path = os.path.join(get_dir_path(path), new_name)
+        new_path = os.path.join(get_parent_dir(path), new_name)
         # Create a copy of the file with a timestamp
         copy(path, new_path)
         # Touch the original file so its modification time is newer than the copy

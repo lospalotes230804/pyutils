@@ -4,23 +4,24 @@
 
 `pyutils` is a Python utility library that provides a collection of helpful functions and modules for common tasks with basic elements, such as:
 
-- String validation & manipulation
-- Date validation & manipulation
-- File validation & manipulation
-- Directory validation & manipulation
-- Database validation & manipulation (pending)
-- Server validation & manipulation (pending)
-- Internet validation & manipulation (pending)
+-   String validation & manipulation
+-   Date validation & manipulation
+-   File validation & manipulation
+-   Directory validation & manipulation
+-   Database validation & manipulation (pending)
+-   Server validation & manipulation (pending)
+-   Internet validation & manipulation (pending)
 
 All functions and modules are intended to be SO independent, so they should work on Windows, Linux and Mac OS.
 
 Inspired in https://github.com/daveoncode/python-utils
 
 Please note that
-- This is a personal project, so it is not intended to be used in production environments.
-- The project is in an early stage of development
-- Work is in progress, so code may change without notice
-- Testing may not be complete or may not exist at all
+
+-   This is a personal project, so it is not intended to be used in production environments.
+-   The project is in an early stage of development
+-   Work is in progress, so code may change without notice
+-   Testing may not be complete or may not exist at all
 
 Enjoy it and feel free to contribute!
 
@@ -48,10 +49,7 @@ With the validation functions you can validate if a string is a valid email or a
 import pyutils.string.validate as str_val
 
 email = "example@domain.com"  # Validate if a string is a valid email
-if str_val.is_email(email):
-    print(f"{email} es un correo electrónico válido.")
-else:
-    print(f"{email} no es un correo electrónico válido.")
+print(f"The email '{email}' is " + ("valid" if str_val.is_email(email) else "not valid") + ".")
 ```
 
 ### String information
@@ -63,6 +61,8 @@ import pyutils.string.info as str_info
 
 text = "This is a text"  # Get the number of words in a string
 words = str_info.get_words(text)
+print(f"The text has {words} words.")
+```
 
 ### String processing
 
@@ -72,7 +72,7 @@ With the processing functions you can process a string, such as, capitalize word
 import pyutils.string.process as str_proc
 
 text = "This is a text"  # Capitalize words in a string
-capitalized_text = str_proc.capitalize_words(text)
+print(f"Capitalized text: {str_proc.capitalize_words(text)}")
 ```
 
 ### File validations
@@ -83,10 +83,12 @@ With the validation functions you can validate if a file is empty, if its writab
 import pyutils.file.validate as file_val
 
 file_path = "path/to/file.txt"  # File to validate
-if file_val.is_empty(file_path):
-    print(f"{file_path} is empty.")
-else:
-    print(f"{file_path} is not empty.")
+# Check if a file is empty
+print(f"{file_path} is " + ("empty" if file_val.is_empty(file_path) else "not empty") + ".")
+# Check if a file is hidden
+print(f"{file_path} is " + ("hidden" if file_val.is_hidden(file_path) else "not hidden") + ".")
+# Check if a file is a JSON file
+print(f"{file_path} is " + ("a JSON file" if file_val.is_json(file_path) else "not a JSON file") + ".")
 ```
 
 ### File information
@@ -97,7 +99,12 @@ With the information functions you can get information about a file, such as the
 import pyutils.file.info as file_info
 
 file_path = "path/to/file.txt"  # File to get information
-owner = file_info.get_owner(file_path)
+# Get the file owner
+print(f"{file_path} is owned by {file_info.get_owner(file_path)}.")
+# Get the file size
+print(f"{file_path} has a size of {file_info.get_size(file_path)} bytes.")
+# Get the file creation date
+print(f"{file_path} was created on {file_info.get_creation_date(file_path)}.")
 ```
 
 ### File processing
@@ -124,10 +131,12 @@ With the validation functions you can validate if a directory is empty, if its w
 import pyutils.directory.validate as dir_val
 
 dir_path = "path/to/dir"  # Directory to validate
-if dir_val.is_empty(dir_path):
-    print(f"{dir_path} is empty.")
-else:
-    print(f"{dir_path} is not empty.")
+# Check if a directory is empty
+print(f"{dir_path} is " + ("empty" if dir_val.is_empty(dir_path) else "not empty") + ".")
+# Check if a directory is hidden
+print(f"{dir_path} is " + ("hidden" if dir_val.is_hidden(dir_path) else "not hidden") + ".")
+# Check if a directory is writable
+print(f"{dir_path} is " + ("writable" if dir_val.is_writable(dir_path) else "not writable") + ".")
 ```
 
 ### Directory information
@@ -138,8 +147,12 @@ With the information functions you can get information about a directory, such a
 import pyutils.directory.info as dir_info
 
 dir_path = "path/to/dir"  # Directory to get information
-owner = dir_info.get_owner(dir_path)    # Get the owner of a directory
-print(f"{dir_path} is owned by {owner}.")
+# Get the directory owner
+print(f"{dir_path} is owned by {dir_info.get_owner(dir_path)}.")
+# Get the directory size
+print(f"{dir_path} has a size of {dir_info.get_size(dir_path)} bytes.")
+# Get the directory creation date
+print(f"{dir_path} was created on {dir_info.get_creation_date(dir_path)}.")
 ```
 
 ### Directory processing
@@ -147,6 +160,16 @@ print(f"{dir_path} is owned by {owner}.")
 With the processing functions you can process a directory, such as, create it, delete it, copy it, duplicate it, etc.
 
 ```python
+import pyutils.directory.process as dir_proc
+
+dir_path = "path/to/dir"  # Directory to process
+# Duplicate directory (adds a sequential number to the directory name)
+new_path = dir_proc.duplicate(dir_path) # path/to/dir (1)
+print(f"{dir_path} was duplicated to {new_path}.")
+# Move directory
+new_path = dir_proc.move(dir_path, "path/to/new/dir") # path/to/new/dir
+print(f"{dir_path} was moved to {new_path}.")
+```
 
 ## Contributing
 
@@ -157,4 +180,5 @@ Contributions are welcome! If you have any ideas, bug reports, or feature reques
 This project is licensed under the MIT License. See the LICENSE file for details.
 
 ## Contact
+
 For questions or feedback, you can reach us at javalotodo@email.com.

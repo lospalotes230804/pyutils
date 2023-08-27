@@ -18,7 +18,6 @@ DEFAULT_TIMESTAMP_FORMAT = "%Y%m%d-%H%M%S"
 
 # Basic file operations
 
-
 def create(path: str) -> bool:
     """
     Method to create the directory, if not exists.
@@ -34,7 +33,6 @@ def create(path: str) -> bool:
     if str.is_path(path) and not is_dir(path):
         os.mkdir(path)
         return is_dir(path)
-
 
 def delete(path: str) -> bool:
     """
@@ -57,7 +55,6 @@ def delete(path: str) -> bool:
             os.rmdir(path)
         return not is_dir(path)
 
-
 def empty(path: str) -> bool:
     """
     Method to empty the directory, if exists.
@@ -78,8 +75,7 @@ def empty(path: str) -> bool:
                 shutil.rmtree(os.path.join(root, d))
         return is_empty(path)
 
-
-def rename(path: str, new_path: str) -> bool:
+def rename(path: str, new_path: str) -> str:
     """
     Method to rename the directory, if exists.
 
@@ -91,15 +87,15 @@ def rename(path: str, new_path: str) -> bool:
     :type path: str
     :param new_path: The new path to the directory.
     :type new_path: str
-    :return: True if the directory was renamed successfully
+    :return: The path to the renamed directory.
     """
     if (str.is_path(path) and is_dir(path)
             and is_writable(path) and not is_dir(new_path)):
         os.rename(path, new_path)
-        return is_dir(new_path)
+        if is_dir(new_path):
+            return new_path
 
-
-def copy(path: str, new_path: str) -> bool:
+def copy(path: str, new_path: str) -> str:
     """
     Method to copy dir, return True if success
     If copied dir exists rename it with timestamp
@@ -112,14 +108,14 @@ def copy(path: str, new_path: str) -> bool:
     :type path: str
     :param new_path: The new path to the directory.
     :type overwrite: bool
-    :return: True if the directory was copied successfully
+    :return: The path to the copied directory.
     """
     if str.is_path(path) and is_dir(path) and is_writable(path):
         if is_dir(new_path):
             new_path = get_duplicated_path(new_path)
         shutil.copytree(path, new_path)
-        return is_dir(new_path)
-
+        if is_dir(new_path):
+            return new_path
 
 def duplicate(path: str) -> str:
     """
@@ -136,8 +132,8 @@ def duplicate(path: str) -> str:
     """
     if str.is_path(path) and is_dir(path) and is_writable(path):
         new_path = get_duplicated_path(path)
-        return copy(path, new_path)
-
+        if copy(path, new_path) and is_dir(new_path):
+            return new_path
 
 def get_duplicated_path(path_to_duplicate) -> str:
     """
@@ -176,7 +172,6 @@ def get_duplicated_path(path_to_duplicate) -> str:
     else:
         new_name = os.path.join(path, f"{name1} ({1})")
         return new_name
-
 
 def move(path, new_path: str) -> bool:
     """

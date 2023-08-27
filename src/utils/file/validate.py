@@ -4,10 +4,9 @@ This file contains functions for validate files.
 
 # Importing the required libraries
 import os
-import sqlite3
-import stat
 import sys
-import json
+import stat
+import sqlite3
 import utils.string.validate as str
 import utils.string.process as str
 from utils.file.process import read
@@ -16,9 +15,6 @@ from typing import Any, Optional, List
 from .._regex import *
 from ..errors import InvalidInputError
 # if Unix, import pwd module
-if sys.platform.startswith('linux'):
-    import pwd
-    import grp
 
 # Simple validations => basic name & path operations
 

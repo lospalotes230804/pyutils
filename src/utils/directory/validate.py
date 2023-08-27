@@ -4,7 +4,6 @@ This file contains functions for validate directories.
 
 # Importing the required libraries
 import os
-import re
 import sys
 import string.validate as str
 import string.process as str

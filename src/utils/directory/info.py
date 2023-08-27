@@ -8,10 +8,9 @@ import sys
 import datetime as dt
 import utils.file.info as fil
 from utils.directory.validate import is_dir, is_hidden
-from utils.directory.info import get_absolute_path, get_dir_path, get_name
+from utils.directory.info import get_absolute_path, get_parent_dir, get_name
 
 # Get information about a directory
-
 
 def get_size(path: str) -> int:
     """
@@ -28,7 +27,6 @@ def get_size(path: str) -> int:
     if is_dir(path):
         return sum(os.path.getsize(os.path.join(path, f)) for f in os.listdir(path))
 
-
 def get_name(path: str) -> str:
     """
     Gets the name of a directory.
@@ -43,7 +41,6 @@ def get_name(path: str) -> str:
     """
     if is_dir(path):
         return os.path.basename(path)
-
 
 def get_relative_path(path: str) -> str:
     """
@@ -60,7 +57,6 @@ def get_relative_path(path: str) -> str:
     if is_dir(path):
         return os.path.relpath(path)
 
-
 def get_absolute_path(path: str) -> str:
     """
     Gets the absolute path of a directory.
@@ -76,8 +72,7 @@ def get_absolute_path(path: str) -> str:
     if is_dir(path):
         return os.path.abspath(path)
 
-
-def get_dir_path(path: str) -> str:
+def get_parent_dir(path: str) -> str:
     """
     Gets the directory path of a directory.
 
@@ -91,7 +86,6 @@ def get_dir_path(path: str) -> str:
     """
     if is_dir(path):
         return os.path.dirname(path)
-
 
 def get_creation_datetime(path: str) -> dt.datetime:
     """
@@ -108,7 +102,6 @@ def get_creation_datetime(path: str) -> dt.datetime:
     if is_dir(path):
         return os.path.getctime(path)
 
-
 def get_modification_datetime(path: str) -> dt.datetime:
     """
     Gets the modification time of a directory.
@@ -124,7 +117,6 @@ def get_modification_datetime(path: str) -> dt.datetime:
     if is_dir(path):
         return os.path.getmtime(path)
 
-
 def get_access_datetime(path: str) -> dt.datetime:
     """
     Gets the access time of a directory.
@@ -139,7 +131,6 @@ def get_access_datetime(path: str) -> dt.datetime:
     """
     if is_dir(path):
         return os.path.getatime(path)
-
 
 def get_owner(path: str) -> str:
     """
@@ -164,7 +155,6 @@ def get_owner(path: str) -> str:
             name, domain, type = win32security.LookupAccountSid(None, owner_sid)
             return name
 
-
 def get_group(path: str) -> str:
     """
     Gets the group of a directory.
@@ -187,7 +177,6 @@ def get_group(path: str) -> str:
             owner_sid = sd.GetSecurityDescriptorGroup()
             name, domain, type = win32security.LookupAccountSid(None, owner_sid)
             return name
-
 
 def get_content(path: str, hidden=False) -> list:
     """
@@ -235,7 +224,6 @@ def get_content(path: str, hidden=False) -> list:
                         tree.append(f)
         return tree
 
-
 def get_content_with_size(path: str, hidden=False) -> list:
     """
     Gets the content of a directory with the size of each file.
@@ -275,7 +263,6 @@ def get_content_with_size(path: str, hidden=False) -> list:
                         tree.append((f,
                                      fil.get_size(f)))
         return tree
-
 
 def get_content_with_size_type(path: str, hidden=False) -> list:
     """
@@ -320,7 +307,6 @@ def get_content_with_size_type(path: str, hidden=False) -> list:
                                      fil.get_size(f),
                                      fil.get_extension(f)))
         return tree
-
 
 def get_content_with_size_type_date(path: str, hidden=False) -> list:
     """
@@ -369,6 +355,5 @@ def get_content_with_size_type_date(path: str, hidden=False) -> list:
                                      fil.get_extension(f),
                                      fil.get_creation_datetime(f)))
         return tree
-
 
 # def get_content_recursive

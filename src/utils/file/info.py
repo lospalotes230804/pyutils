@@ -71,7 +71,7 @@ def get_absolute_path(path: str) -> str:
     if is_file(path):
         return os.path.abspath(path)
 
-def get_dir_path(path: str) -> str:
+def get_parent_dir(path: str) -> str:
     """
     Gets the directory path of a file.
 
