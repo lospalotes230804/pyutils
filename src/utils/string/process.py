@@ -265,7 +265,7 @@ def json_wrapper(input_string: str) -> str:
     """
     Wraps a string with square brackets or curly braces if it is not already wrapped.
     """
-    if JSON_WRAPPER_RE.match(input_string):
+    if JSON_RE.match(input_string):
         return input_string
     else:
         return "[{}]".format(input_string)
@@ -275,7 +275,7 @@ def json_unwrapper(input_string: str) -> str:
     """
     Unwraps a string from square brackets or curly braces if it is wrapped.
     """
-    return JSON_WRAPPER_RE.match(input_string).group(1)
+    return JSON_RE.match(input_string).group(1)
 
 
 def json_to_dict(input_string: str) -> dict:
@@ -323,7 +323,7 @@ def strip_html(input_string: str, keep_tag_content: bool = False) -> str:
     :type keep_tag_content: bool
     :return: String with html removed.
     """
-    if not sv.is_string(input_string):
+    if not is_string(input_string):
         raise InvalidInputError(input_string)
 
     r = HTML_TAG_ONLY_RE if keep_tag_content else HTML_RE

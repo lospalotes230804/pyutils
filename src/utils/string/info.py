@@ -53,7 +53,22 @@ def get_lines(string: str) -> list:
     if is_string(string):
         return string.splitlines()
     
-def get_alphabetic(string: str) -> str:
+def get_chars(string: str) -> list:
+    """
+    Gets the characters of a string.
+
+    *Examples:*
+
+    >>> get_characters('Hello World!') # returns ['H', 'e', 'l', 'l', 'o', ' ', 'W', 'o', 'r', 'l', 'd', '!']
+
+    :param string: The string.
+    :type string: str
+    :return: The characters of the string.
+    """
+    if is_string(string):
+        return list(string)
+    
+def get_alphabetic_chars(string: str) -> str:
     """
     Gets the alphabetic characters of a string.
 
@@ -68,7 +83,7 @@ def get_alphabetic(string: str) -> str:
     if is_string(string):
         return re.sub(r'[^a-zA-Z]', '', string)
     
-def get_alphanumeric(string: str) -> str:
+def get_alphanumeric_chars(string: str) -> str:
     """
     Gets the alphanumeric characters of a string.
 

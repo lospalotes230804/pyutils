@@ -18,7 +18,6 @@ DEFAULT_TIMESTAMP_FORMAT = "%Y%m%d-%H%M%S"
 
 # Basic file operations
 
-
 def create(path: str) -> bool:
     """
     Creates a file.
@@ -35,7 +34,6 @@ def create(path: str) -> bool:
     if not is_file(path):
         open(path, 'w', DEFAULT_ENCODING).close()
         return True
-
 
 def delete(path: str) -> bool:
     """
@@ -54,7 +52,6 @@ def delete(path: str) -> bool:
         os.remove(path)
         return True
 
-
 def read(path: str) -> str:
     """
     Reads the content of a file.
@@ -70,7 +67,6 @@ def read(path: str) -> str:
     path = get_absolute_path(path)
     if is_file(path):
         return open(path, 'r', DEFAULT_ENCODING).read()
-
 
 def write(path: str, content: str) -> bool:
     """
@@ -89,7 +85,6 @@ def write(path: str, content: str) -> bool:
         open(path, 'w', DEFAULT_ENCODING).write(content)
         return True
 
-
 def append(path: str, content: str) -> bool:
     """
     Appends content to a file.
@@ -106,7 +101,6 @@ def append(path: str, content: str) -> bool:
     if is_file(path):
         open(path, 'a', DEFAULT_ENCODING).write(content)
         return True
-
 
 def empty(path: str) -> bool:
     """
@@ -125,8 +119,7 @@ def empty(path: str) -> bool:
         open(path, 'w', DEFAULT_ENCODING).close()
         return True
 
-
-def rename(path: str, new_path: str) -> bool:
+def rename(path: str, new_path: str) -> str:
     """
     Method to rename file, return new path if success
 
@@ -136,6 +129,8 @@ def rename(path: str, new_path: str) -> bool:
 
     :param path: The path to the file.
     :type path: str
+    :param new_path: The new path to the file.
+    :type new_path: str
     :return: The path to the renamed file.
     """
     path = get_absolute_path(path)
@@ -144,19 +139,24 @@ def rename(path: str, new_path: str) -> bool:
         and str.is_path(new_path)
             and not is_file(new_path)):
         os.rename(path, new_path)
-        return is_file(new_path)
+    if is_file(new_path):
+        return new_path
 
-
-def copy(path: str, new_path: str) -> bool:
+def copy(path: str, new_path: str) -> str:
     """
     Method to copy file, return new path if success
 
     *Examples:*
 
-    >>> copy('C:\\Users\\User\\Desktop\\file.txt', 'C:\\Users\\User\\Desktop\\file2.txt') # copies the file
+    >>> copy('C:\\Users\\User\\Desktop\\file.txt', 'C:\\Users\\User\\Desktop\\file2.txt')
+        # returns 'C:\\Users\\User\\Desktop\\file2.txt' if the destination file does not exist
+    >>> copy('C:\\Users\\User\\Desktop\\file.txt', 'C:\\Users\\User\\Desktop\\file2.txt')
+        # returns 'C:\\Users\\User\\Desktop\\file2 (1).txt' if the destination file exists
 
     :param path: The path to the file to copy.
     :type path: str
+    :param new_path: The path to the new file.
+    :type new_path: str
     :return: The path to the copied file.
     """
     path = get_absolute_path(path)
@@ -168,8 +168,8 @@ def copy(path: str, new_path: str) -> bool:
         and str.is_path(new_path)
             and not is_file(new_path)):
         shutil.copy(path, new_path)
-        return is_file(new_path)
-
+    if is_file(new_path):
+        return new_path
 
 def duplicate(path: str) -> str:
     """
@@ -177,7 +177,8 @@ def duplicate(path: str) -> str:
 
     *Examples:*
 
-    >>> duplicate('C:\\Users\\User\\Desktop\\file.txt') # duplicates the file
+    >>> duplicate('C:\\Users\\User\\Desktop\\file.txt') # returns 'C:\\Users\\User\\Desktop\\file (1).txt' if 'file (1).txt' does not exist
+    >>> duplicate('C:\\Users\\User\\Desktop\\file.txt') # returns 'C:\\Users\\User\\Desktop\\file (2).txt' if 'file (1).txt' already exists
 
     :param path: The path to the file to duplicate.
     :type path: str
@@ -190,7 +191,6 @@ def duplicate(path: str) -> str:
         shutil.copy(path, new_path)
     if is_file(new_path):
         return new_path
-
 
 def get_duplicated_path(path) -> str:
     """
@@ -218,7 +218,6 @@ def get_duplicated_path(path) -> str:
     # Add sequential number to the name
     return os.path.join(path, name + f" ({sequential_number})" + extension)
 
-
 def archive(path: str) -> str:
     """
     Method to archive file, return new path if success
@@ -245,7 +244,6 @@ def archive(path: str) -> str:
         os.utime(path, None)
         if is_file(new_path):
             return new_path
-
 
 def move(path, new_dir: str, overwrite=False) -> str:
     """

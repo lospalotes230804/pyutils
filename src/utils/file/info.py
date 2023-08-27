@@ -191,7 +191,7 @@ def get_group(path: str) -> str:
             sd = win32security.GetFileSecurity(path, win32security.OWNER_SECURITY_INFORMATION)
             owner_sid = sd.GetSecurityDescriptorOwner()
             name, domain, type = win32security.LookupAccountSid(None, owner_sid)
-            return name            
+            return name
 
 def get_encoding(path: str) -> str:
     """

@@ -12,7 +12,6 @@ from ..errors import InvalidInputError
 
 # Simple validations => basic string operations
 
-
 def is_string(obj: Any) -> bool:
     """
     Checks if the given string is a string.
@@ -26,7 +25,6 @@ def is_string(obj: Any) -> bool:
     :return: True if string, false otherwise.
     """
     return isinstance(obj, str)
-
 
 def is_full_string(input_string: str) -> bool:
     """
@@ -45,7 +43,6 @@ def is_full_string(input_string: str) -> bool:
     """
     return is_string(input_string) and input_string.strip() != ''
 
-
 def is_multiline(input_string: str) -> bool:
     """
     Check if a string is multiline.
@@ -63,7 +60,6 @@ def is_multiline(input_string: str) -> bool:
     """
     return is_full_string(input_string) and re.search(r'[\r\n]', input_string)
 
-
 def is_alpha(input_string: str) -> bool:
     """
     Check if a string is alphabetic.
@@ -79,7 +75,6 @@ def is_alpha(input_string: str) -> bool:
     :return: True if alphabetic, false otherwise.
     """
     return is_full_string(input_string) and input_string.isalpha()
-
 
 def is_alphanumeric(input_string: str) -> bool:
     """
@@ -98,7 +93,6 @@ def is_alphanumeric(input_string: str) -> bool:
     return is_full_string(input_string) and input_string.isalnum()
 
 # Simple validations => data types (int, float, bool, datetime, ...)
-
 
 def is_number(input_string: str) -> bool:
     """
@@ -125,7 +119,6 @@ def is_number(input_string: str) -> bool:
 
     return NUMBER_RE.match(input_string) is not None
 
-
 def is_integer(input_string: str) -> bool:
     """
     Checks whether the given string represents an integer or not.
@@ -143,7 +136,6 @@ def is_integer(input_string: str) -> bool:
     :return: True if integer, false otherwise
     """
     return is_number(input_string) and ',' not in input_string
-
 
 def is_decimal(input_string: str) -> bool:
     """
@@ -163,7 +155,6 @@ def is_decimal(input_string: str) -> bool:
     """
     return is_number(input_string) and ',' in input_string
 
-
 def is_datetime(input_string: str, first) -> bool:
     """
     Checks whether the given string represents a datetime or not.
@@ -182,7 +173,6 @@ def is_datetime(input_string: str, first) -> bool:
 # def test_is_date(self):
 
 # def test_is_time(self):
-
 
 def is_bool(input_string: str) -> bool:
     """
@@ -213,7 +203,6 @@ def is_bool(input_string: str) -> bool:
 
 # Specific validations => specific strings (paths, filenames, urls, ...)
 
-
 def is_path(input_string: str) -> bool:
     """
     Checks whether the given string represents a path or not.
@@ -232,7 +221,6 @@ def is_path(input_string: str) -> bool:
     return (is_full_string(input_string)
             and PATH_RE.search(input_string) is not None)
 
-
 def is_filename(input_string: str) -> bool:
     """
     Checks whether the given string represents a filename or not.
@@ -248,7 +236,6 @@ def is_filename(input_string: str) -> bool:
     :return: True if filename, false otherwise
     """
     return is_full_string(input_string) and FILENAME_RE.match(input_string) is not None
-
 
 def is_url(input_string: str) -> bool:
     """
@@ -268,7 +255,6 @@ def is_url(input_string: str) -> bool:
     """
     return is_full_string(input_string) and URL_RE.match(input_string) is not None
 
-
 def is_ip(input_string: str) -> bool:
     """
     Checks whether the given string represents an IP address or not.
@@ -282,7 +268,6 @@ def is_ip(input_string: str) -> bool:
     :return: True if IP address, false otherwise
     """
     return is_full_string(input_string) and IP_V4_RE.match(input_string) is not None
-
 
 def is_hostname(input_string: str) -> bool:
     """
@@ -301,7 +286,6 @@ def is_hostname(input_string: str) -> bool:
     return (is_full_string(input_string)
             and HOSTNAME_RE.match(input_string) is not None)
 
-
 def is_domain(input_string: str) -> bool:
     """
     Checks whether the given string represents a domain or not.
@@ -317,7 +301,6 @@ def is_domain(input_string: str) -> bool:
     :return: True if domain, false otherwise
     """
     return is_full_string(input_string) and DOMAIN_RE.match(input_string) is not None
-
 
 def is_email(input_string: str) -> bool:
     """
@@ -340,7 +323,6 @@ def is_email(input_string: str) -> bool:
     """
     return is_full_string(input_string) and EMAIL_RE.match(input_string) is not None
 
-
 def is_password(input_string: str) -> bool:
     """
     Checks whether the given string represents a password or not.
@@ -359,7 +341,6 @@ def is_password(input_string: str) -> bool:
 
 # Specific validations => data structures (json, xml, ...)
 
-
 def is_json(input_string: str) -> bool:
     """
     Checks whether the given string represents a JSON or not.
@@ -376,7 +357,7 @@ def is_json(input_string: str) -> bool:
     :type input_string: str
     :return: True if json, false otherwise
     """
-    if is_full_string(input_string) and JSON_WRAPPER_RE.match(input_string) is not None:
+    if is_full_string(input_string) and JSON_RE.match(input_string) is not None:
         try:
             return isinstance(json.loads(input_string), (dict, list))
         except (TypeError, ValueError, OverflowError):
@@ -384,6 +365,30 @@ def is_json(input_string: str) -> bool:
 
     return False
 
+def is_csv(input_string: str) -> bool:
+    """
+    Checks whether the given string represents a CSV or not.
+
+    *Examples:*
+
+    >>> is_csv('foo,bar') # returns true
+    >>> is_csv('foo,bar\\nfoo,bar') # returns true
+    >>> is_csv('foo,bar\\nfoo,bar\\n') # returns true
+    >>> is_csv('foo,bar\\nfoo,bar\\nfoo,bar') # returns true
+    >>> is_csv('foo,bar\\nfoo,bar\\nfoo,bar\\n') # returns true
+    >>> is_csv('foo,bar\\nfoo,bar\\nfoo,bar\\nfoo,bar') # returns true
+    >>> is_csv('foo,bar\\nfoo,bar\\nfoo,bar\\nfoo,bar\\n') # returns true
+    >>> is_csv('foo,bar\\nfoo,bar\\nfoo,bar\\nfoo,bar\\nfoo,bar') # returns true
+    >>> is_csv('foo,bar\\nfoo,bar\\nfoo,bar\\nfoo,bar\\nfoo,bar\\n') # returns true
+    >>> is_csv('foo,bar\\nfoo,bar\\nfoo,bar\\nfoo,bar\\nfoo,bar\\nfoo,bar') # returns true
+    >>> is_csv('foo,bar\\nfoo,bar\\nfoo,bar\\nfoo,bar\\nfoo,bar\\nfoo,bar\\n') # returns true
+    >>> is_csv('foo,bar\\nfoo,bar\\nfoo,bar\\nfoo,bar\\nfoo,bar\\nfoo,bar\\nfoo,bar') # returns true
+
+    :param input_string: String to check.
+    :type input_string: str
+    :return: True if csv, false otherwise
+    """
+    return is_full_string(input_string) and CSV_RE.match(input_string) is not None
 
 def is_xml(input_string: str) -> bool:
     """

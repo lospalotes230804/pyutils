@@ -70,7 +70,11 @@ CREDIT_CARDS = {
     'JCB': re.compile(r'^(?:2131|1800|35\d{3})\d{11}$')
 }
 
-JSON_WRAPPER_RE = re.compile(r'^\s*[\[{]\s*(.*)\s*[\}\]]\s*$', re.MULTILINE | re.DOTALL)
+JSON_RE = re.compile(r'^\s*[\[{]\s*(.*)\s*[\}\]]\s*$', re.MULTILINE | re.DOTALL)
+
+CSV_RE = re.compile(r'^\s*([^,]+)(?:\s*,\s*([^,]+))*\s*$', re.MULTILINE | re.DOTALL)
+
+XML_RE = re.compile(r'^\s*<([^>]+)>(.*)</\1>\s*$', re.MULTILINE | re.DOTALL)
 
 UUID_RE = re.compile(r'^[a-f\d]{8}-[a-f\d]{4}-[a-f\d]{4}-[a-f\d]{4}-[a-f\d]{12}$', re.IGNORECASE)
 
