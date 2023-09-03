@@ -8,7 +8,7 @@ NUMBER_RE = re.compile(r'^([+\-]?)((\d+)(\,\d+)?(e\d+)?|\,\d+)$')
 
 PATH_RE = re.compile(r'^([a-zA-Z]:)?[\\/]+(?:[^\\/]+[\\/]+)*[^\\/]+$')
 
-FILENAME_RE = re.compile(r'^[a-zA-Z0-9áéíóúÁÉÍÓÚ \(\)\.,-]+\.[a-zA-Z]{2,}$', re.IGNORECASE)
+FILENAME_RE = re.compile(r'^[a-zA-Z0-9áéíóúÁÉÍÓÚ\.\,\-\_\ \(\)]+\.[a-zA-Z]{2,}$', re.IGNORECASE)
 
 HIDDEN_FILENAME_RE = re.compile(r'^\..+$')
 
@@ -102,6 +102,8 @@ XML_RE = re.compile(
 )
 
 SPACES_RE = re.compile(r'\s')
+
+NON_PRINTABLE_RE = re.compile(r'[\x00-\x08\x0B\x0C\x0E-\x1F\x7F-\x9F]')
 
 PRETTIFY_RE = {
     # match repetitions of signs that should not be repeated (like multiple spaces or duplicated quotes)

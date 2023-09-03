@@ -7,7 +7,7 @@ import os
 import sys
 import chardet
 import datetime as dt
-from .validate import is_file
+from src.utils.file.validate import is_file
 
 # Get information about a file
 
@@ -22,11 +22,12 @@ def get_size(path: str) -> int:
     :param path: The path to the file.
     :type path: str
     :return: The size of the file in bytes.
+    :rtype: int
     """
     if is_file(path):
         return os.path.getsize(path)
 
-def get_name(path: str) -> str:
+def get_filename(path: str) -> str:
     """
     Gets the name of a file.
 
@@ -37,9 +38,23 @@ def get_name(path: str) -> str:
     :param path: The path to the file.
     :type path: str
     :return: The name of the file.
+    :rtype: str
     """
-    if is_file(path):
-        return os.path.basename(path)
+    return os.path.basename(path)
+
+def get_filename_w_ext(path: str) -> str:
+    """
+    Gets the name of a file without the extension.
+
+    *Examples:*
+
+    >>> get_name('C:\\Users\\User\\Desktop\\file.txt') # returns 'file'
+
+    :param path: The path to the file.
+    :type path: str
+    :return: The name of the file without the extension.
+    """
+    return os.path.splitext(os.path.basename(path))[0]
 
 def get_relative_path(path: str) -> str:
     """
@@ -52,9 +67,9 @@ def get_relative_path(path: str) -> str:
     :param path: The path to the file.
     :type path: str
     :return: The relative path of the file.
+    :rtype: str
     """
-    if is_file(path):
-        return os.path.relpath(path)
+    return os.path.relpath(path)
 
 def get_absolute_path(path: str) -> str:
     """
@@ -67,9 +82,9 @@ def get_absolute_path(path: str) -> str:
     :param path: The path to the file.
     :type path: str
     :return: The absolute path of the file.
+    :rtype: str
     """
-    if is_file(path):
-        return os.path.abspath(path)
+    return os.path.abspath(path)
 
 def get_parent_dir(path: str) -> str:
     """
@@ -82,9 +97,9 @@ def get_parent_dir(path: str) -> str:
     :param path: The path to the file.
     :type path: str
     :return: The directory path of the file.
+    :rtype: str
     """
-    if is_file(path):
-        return os.path.dirname(path)
+    return os.path.dirname(path)
 
 def get_extension(path: str) -> str:
     """
@@ -97,9 +112,9 @@ def get_extension(path: str) -> str:
     :param path: The path to the file.
     :type path: str
     :return: The extension of the file.
+    :rtype: str
     """
-    if is_file(path):
-        return os.path.splitext(path)[1][1:]
+    return os.path.splitext(path)[1][1:]
 
 def get_creation_datetime(path: str) -> dt.datetime:
     """
@@ -112,6 +127,7 @@ def get_creation_datetime(path: str) -> dt.datetime:
     :param path: The path to the file.
     :type path: str
     :return: The creation datetime of the file.
+    :rtype: dt.datetime
     """
     # return creation time in datetime format
     if is_file(path):
@@ -128,6 +144,7 @@ def get_modification_datetime(path: str) -> dt.datetime:
     :param path: The path to the file.
     :type path: str
     :return: The modification datetime of the file.
+    :rtype: dt.datetime
     """
     if is_file(path):
         return dt.datetime.fromtimestamp(os.path.getmtime(path))
@@ -143,13 +160,16 @@ def get_access_datetime(path: str) -> dt.datetime:
     :param path: The path to the file.
     :type path: str
     :return: The access datetime of the file.
+    :rtype: dt.datetime
     """
     if is_file(path):
         return dt.datetime.fromtimestamp(os.path.getatime(path))
 
 def get_owner(path: str) -> str:
     """
-    Gets the owner of a file (only for Unix)
+    Gets the user who owns the file.
+
+    @TODO: It works for Windows. Needed testing for other SOs.
 
     *Examples:*
 
@@ -158,6 +178,7 @@ def get_owner(path: str) -> str:
     :param path: The path to the file.
     :type path: str
     :return: The owner of the file.
+    :rtype: str
     """
     if is_file(path):
         if sys.platform.startswith('linux') or sys.platform.startswith('darwin'):
@@ -173,6 +194,10 @@ def get_owner(path: str) -> str:
 def get_group(path: str) -> str:
     """
     Gets the group of a file (only for Unix)
+    Get the owner of a directory first with get_owner()
+    and then get all the groups of that user.
+
+    @TODO: This function doesn't work as expected (only tested in Windows).
 
     *Examples:*
 
@@ -181,6 +206,7 @@ def get_group(path: str) -> str:
     :param path: The path to the file.
     :type path: str
     :return: The group of the file.
+    :rtype: str
     """
     if is_file(path):
         if sys.platform.startswith('linux') or sys.platform.startswith('darwin'):
@@ -196,6 +222,7 @@ def get_group(path: str) -> str:
 def get_encoding(path: str) -> str:
     """
     Gets the encoding of a file.
+    @TODO: Doesn't work as expected. Fix this function.
 
     *Examples:*
 
@@ -204,6 +231,9 @@ def get_encoding(path: str) -> str:
     :param path: The path to the file.
     :type path: str
     :return: The encoding of the file.
+    :rtype: str
     """
     if is_file(path):
-        return chardet.detect(open(path, "r").read())['encoding']
+        return chardet.detect(open(path, 'r', encoding='utf-8').read().encode())['encoding']
+
+

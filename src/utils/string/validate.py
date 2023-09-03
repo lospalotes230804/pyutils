@@ -10,7 +10,7 @@ from typing import Any, Optional, List
 from .._regex import *
 from ..errors import InvalidInputError
 
-# Simple validations => basic string operations
+# Basic string validations
 
 def is_string(obj: Any) -> bool:
     """
@@ -42,6 +42,23 @@ def is_full_string(input_string: str) -> bool:
     :return: True if not empty, false otherwise.
     """
     return is_string(input_string) and input_string.strip() != ''
+
+def is_empty(input_string: str) -> bool:
+    """
+    Check if a string is empty (it must contains only spaces).
+
+    *Examples:*
+
+    >>> is_empty(None) # returns false
+    >>> is_empty('') # returns true
+    >>> is_empty(' ') # returns true
+    >>> is_empty('hello') # returns false
+
+    :param input_string: String to check.
+    :type input_string: str
+    :return: True if empty, false otherwise.
+    """
+    return is_string(input_string) and input_string.strip() == ''
 
 def is_multiline(input_string: str) -> bool:
     """
@@ -92,7 +109,7 @@ def is_alphanumeric(input_string: str) -> bool:
     """
     return is_full_string(input_string) and input_string.isalnum()
 
-# Simple validations => data types (int, float, bool, datetime, ...)
+# Validation of strings containing data types (int, float, bool, datetime, ...)
 
 def is_number(input_string: str) -> bool:
     """
@@ -122,8 +139,8 @@ def is_number(input_string: str) -> bool:
 def is_integer(input_string: str) -> bool:
     """
     Checks whether the given string represents an integer or not.
-
     An integer may be signed or unsigned or use a "scientific notation".
+    DISCLAIMER: Localised to the Spanish format (decimal separator is comma)
 
     *Examples:*
 
@@ -135,7 +152,10 @@ def is_integer(input_string: str) -> bool:
     :type input_string: str
     :return: True if integer, false otherwise
     """
-    return is_number(input_string) and ',' not in input_string
+    # ',' and 'e' are not allowed
+    return (is_number(input_string)
+            and ',' not in input_string
+            and 'e' not in input_string)
 
 def is_decimal(input_string: str) -> bool:
     """
@@ -160,9 +180,16 @@ def is_datetime(input_string: str, first) -> bool:
     Checks whether the given string represents a datetime or not.
 
     *Examples:*
-
+    
     >>> is_datetime('2018-01-01 12:00:00') # returns true
+    >>> is_datetime('25/01/2018 12:00') # returns true
+    >>> is_datetime('25/1/2018 12:30:00') # returns true
+
     >>> is_datetime('2018-01-01') # returns false
+    >>> is_datetime('1/25/2018') # returns false
+    >>> is_datetime('1/1/2018 12:99') # returns false
+    >>> is_datetime('25/1/2018 12:99') # returns false
+    >>> is_datetime('25/01/2018 12:00:99') # returns false
 
     :param input_string: String to check
     :type input_string: str
@@ -201,7 +228,7 @@ def is_bool(input_string: str) -> bool:
     return (is_full_string(input_string) and input_string.lower() in
             ('true', 'false', 'yes', 'no', 'si', 'sí', 'no', '1', '0'))
 
-# Specific validations => specific strings (paths, filenames, urls, ...)
+# Validation of strings containing specific strings (paths, filenames, urls, ...)
 
 def is_path(input_string: str) -> bool:
     """
@@ -339,7 +366,7 @@ def is_password(input_string: str) -> bool:
     """
     return is_full_string(input_string) and PASSWORD_RE.match(input_string) is not None
 
-# Specific validations => data structures (json, xml, ...)
+# Validation of strings containing data structures (json, csv, xml, ...)
 
 def is_json(input_string: str) -> bool:
     """
@@ -372,17 +399,11 @@ def is_csv(input_string: str) -> bool:
     *Examples:*
 
     >>> is_csv('foo,bar') # returns true
-    >>> is_csv('foo,bar\\nfoo,bar') # returns true
-    >>> is_csv('foo,bar\\nfoo,bar\\n') # returns true
-    >>> is_csv('foo,bar\\nfoo,bar\\nfoo,bar') # returns true
-    >>> is_csv('foo,bar\\nfoo,bar\\nfoo,bar\\n') # returns true
-    >>> is_csv('foo,bar\\nfoo,bar\\nfoo,bar\\nfoo,bar') # returns true
-    >>> is_csv('foo,bar\\nfoo,bar\\nfoo,bar\\nfoo,bar\\n') # returns true
-    >>> is_csv('foo,bar\\nfoo,bar\\nfoo,bar\\nfoo,bar\\nfoo,bar') # returns true
-    >>> is_csv('foo,bar\\nfoo,bar\\nfoo,bar\\nfoo,bar\\nfoo,bar\\n') # returns true
-    >>> is_csv('foo,bar\\nfoo,bar\\nfoo,bar\\nfoo,bar\\nfoo,bar\\nfoo,bar') # returns true
-    >>> is_csv('foo,bar\\nfoo,bar\\nfoo,bar\\nfoo,bar\\nfoo,bar\\nfoo,bar\\n') # returns true
-    >>> is_csv('foo,bar\\nfoo,bar\\nfoo,bar\\nfoo,bar\\nfoo,bar\\nfoo,bar\\nfoo,bar') # returns true
+    >>> is_csv('foo,bar,foo') # returns true
+    >>> is_csv('foo;bar;foo;bar') # returns true
+    >>> is_csv('foo;bar;foo;bar;foo') # returns true
+    >>> is_csv('foo;bar;foo;bar;foo;bar') # returns true
+    >>> is_csv('foo|bar|foo|bar|foo|bar|foo') # returns true
 
     :param input_string: String to check.
     :type input_string: str
@@ -406,3 +427,5 @@ def is_xml(input_string: str) -> bool:
     :return: True if xml, false otherwise
     """
     return is_full_string(input_string) and XML_RE.match(input_string) is not None
+
+

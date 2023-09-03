@@ -7,7 +7,7 @@ import re
 import json
 from .._regex import *
 from ..errors import InvalidInputError
-from utils.string.validate import is_string
+from .validate import is_string
 # sys.path.insert(1, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
 ACCENTS_MAP = {
@@ -161,21 +161,23 @@ class __StringFormatter:
 
 # Simple manipulations => basic string operations
 
-
 def remove_non_ascii(input_string: str) -> str:
     """
     Removes non-ascii characters from a string.
 
     *Examples:*
 
-    >>> remove_non_ascii('Hello World!') # returns 'Hello World!'
-    >>> remove_non_ascii('Hello World! 你好') # returns 'Hello World! '
+    >>> remove_non_ascii('foo') # returns 'foo'
+    >>> remove_non_ascii('foo 你好 bar') # returns 'foo bar'
+    >>> remove_non_ascii('foo bar 123') # returns 'foo bar 123'
+    >>> remove_non_ascii('foo bar 123 �') # returns 'foo bar 123 '
 
     :param input_string: The string to manipulate.
     :type input_string: str
+    :return: The string without non-ascii characters.
+    :rtype: str
     """
     return "".join(i for i in input_string if ord(i) < 128)
-
 
 def remove_accents(input_string: str) -> str:
     """
@@ -187,69 +189,129 @@ def remove_accents(input_string: str) -> str:
 
     :param input_string: The string to manipulate.
     :type input_string: str
+    :return: The string without accents.
+    :rtype: str
     """
     # return "".join([char for char in input_string if char not in ACCENTS_MAP])
     return "".join([ACCENTS_MAP.get(char, char) for char in input_string])
 
-
 # String manipulations => formatting
-
 
 def capitalize(input_string: str) -> str:
     """
     Capitalizes a string.
+
+    *Examples:*
+
+    >>> capitalize('foo') # returns 'Foo'
+    >>> capitalize('foo bar') # returns 'Foo bar'
+    >>> capitalize('foo bar 123') # returns 'Foo bar 123'
+
+    :param input_string: The string to manipulate.
+    :type input_string: str
+    :return: The capitalized string.
+    :rtype: str
     """
     return input_string.capitalize()
-
 
 def capitalize_words(input_string: str) -> str:
     """
     Capitalizes all words in a string.
+
+    *Examples:*
+
+    >>> capitalize_words('foo') # returns 'Foo'
+    >>> capitalize_words('foo bar') # returns 'Foo Bar'
+    >>> capitalize_words('foo bar 123') # returns 'Foo Bar 123'
+
+    :param input_string: The string to manipulate.
+    :type input_string: str
+    :return: The capitalized string.
+    :rtype: str
     """
     return " ".join([capitalize(word) for word in input_string.split(" ")])
-
 
 def escape(input_string: str) -> str:
     """
     Escapes a string.
+
+    *Examples:*
+
+    >>> escape('https://www.python.org') # returns 'https://www\.python\.org'
+    >>> escape('f[a-z]*') # returns 'f\[a\-z\]\*'
+
+    :param input_string: The string to manipulate.
+    :type input_string: str
+    :return: The escaped string.
+    :rtype: str
     """
     return re.escape(input_string)
-
 
 def unescape(input_string: str) -> str:
     """
     Unescapes a string.
+
+    *Examples:*
+
+    >>> unescape('foo') # returns 'foo'
+    >>> unescape('foo bar') # returns 'foo bar'
+    >>> unescape('\\bf\[a\-z\]\*') # returns '\bf[a-z]*'
+    >>> unescape('foo bar 123 \\r\\n') # returns 'foo bar 123 \r\n'
+
+    :param input_string: The string to manipulate.
+    :type input_string: str
+    :return: The unescaped string.
+    :rtype: str
     """
     return bytes(input_string, "utf-8").decode("unicode_escape")
-
 
 def remove_whitespace(input_string: str) -> str:
     """
     Removes all whitespace from a string.
+
+    *Examples:*
+
+    >>> remove_whitespace('foo') # returns 'foo'
+    >>> remove_whitespace('foo bar') # returns 'foobar'
+    >>> remove_whitespace('foo bar 123') # returns 'foobar123'
+
+    :param input_string: The string to manipulate.
+    :type input_string: str
+    :return: The string without whitespace.
+    :rtype: str
     """
     return "".join(input_string.split())
 
-
-def remove_zero_width(input_string: str) -> str:
+def remove_non_printable(input_string: str) -> str:
     """
     Removes all zero width characters from a string.
-    """
-    return "".join([char for char in input_string if ord(char) > 32])
+    Use NON_PRINTABLE_RE regex to remove all non-printable characters.
 
+    *Examples:*
 
-def remove_invisible(input_string: str) -> str:
-    """
-    Removes all invisible characters from a string.
-    """
-    return "".join([char for char in input_string if ord(char) > 32])
+    >>> remove_non_printable_chars('foo') # returns 'foo'
+    >>> remove_non_printable_chars('foo bar') # returns 'foo bar'
+    >>> remove_non_printable_chars('foo bar 123') # returns 'foo bar 123'
+    >>> remove_non_printable_chars('foo bar 123 \\x0C') # returns 'foo bar 123 '
+    >>> remove_non_printable_chars('foo bar 123 \\x0B') # returns 'foo bar 123 '
 
+    :param input_string: The string to manipulate.
+    """
+    return NON_PRINTABLE_RE.sub("", input_string)
 
 def remove_non_alphanumeric(input_string: str) -> str:
     """
     Removes all non-alphanumeric characters from a string.
+
+    *Examples:*
+
+    >>> remove_non_alphanumeric('foo') # returns 'foo'
+    >>> remove_non_alphanumeric('foo bar') # returns 'foobar'
+    >>> remove_non_alphanumeric('foo bar 123') # returns 'foobar123'
+    >>> remove_non_alphanumeric('foo bar 123 \\x0C') # returns 'foobar123'
+    
     """
     return "".join([char for char in input_string if char.isalnum()])
-
 
 def replace_accents(input_string: str) -> str:
     """
@@ -257,9 +319,7 @@ def replace_accents(input_string: str) -> str:
     """
     return "".join([ACCENTS_MAP.get(char, char) for char in input_string])
 
-
 # String manipulations => JSON
-
 
 def json_wrapper(input_string: str) -> str:
     """
@@ -270,20 +330,17 @@ def json_wrapper(input_string: str) -> str:
     else:
         return "[{}]".format(input_string)
 
-
 def json_unwrapper(input_string: str) -> str:
     """
     Unwraps a string from square brackets or curly braces if it is wrapped.
     """
     return JSON_RE.match(input_string).group(1)
 
-
 def json_to_dict(input_string: str) -> dict:
     """
     Converts a JSON string to a dictionary.
     """
     return json.loads(json_unwrapper(input_string))
-
 
 def json_to_list(input_string: str) -> list:
     """
@@ -293,20 +350,17 @@ def json_to_list(input_string: str) -> list:
 
 # String manipulations => HTML
 
-
 def html_tag_only(input_string: str) -> str:
     """
     Removes all text from a string, leaving only HTML tags.
     """
     return HTML_TAG_ONLY_RE.sub("", input_string)
 
-
 def html_to_text(input_string: str) -> str:
     """
     Converts HTML to plain text.
     """
     return html2text.html2text(input_string)
-
 
 def strip_html(input_string: str, keep_tag_content: bool = False) -> str:
     """
@@ -331,7 +385,6 @@ def strip_html(input_string: str, keep_tag_content: bool = False) -> str:
     return r.sub('', input_string)
 
 # String manipulations => prettify
-
 
 def prettify(input_string: str) -> str:
     """

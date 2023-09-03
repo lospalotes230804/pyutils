@@ -7,16 +7,15 @@ import os
 import sys
 import shutil
 import ntpath
-import datetime as dt
-import utils.string.validate as str
-import utils.file.validate as fil
-from utils.directory.validate import is_dir, is_empty, is_writable
-from utils.directory.info import get_absolute_path
+import src.utils.string.validate as str
+from .validate import is_dir, is_empty, is_hidden, is_visible  # , is_readonly, is_writable
+from .info import get_absolute_path, get_parent_dir, get_name
+from stat import S_IREAD, S_IWRITE
 
 # Constants
 DEFAULT_TIMESTAMP_FORMAT = "%Y%m%d-%H%M%S"
 
-# Basic file operations
+# Operations about existence / content
 
 def create(path: str) -> bool:
     """
@@ -28,11 +27,13 @@ def create(path: str) -> bool:
 
     :param path: The path to the directory.
     :type path: str
-    :return: True if the directory was created successfully
+    :return: True if the directory was created successfully. False otherwise.
+    :rtype: bool
     """
     if str.is_path(path) and not is_dir(path):
         os.mkdir(path)
         return is_dir(path)
+    return False
 
 def delete(path: str) -> bool:
     """
@@ -45,15 +46,17 @@ def delete(path: str) -> bool:
 
     :param path: The path to the directory.
     :type path: str
-    :return: True if the directory was deleted successfully
+    :return: True if the directory was deleted successfully. False otherwise.
+    :rtype: bool
     """
-    if str.is_path(path) and is_dir(path) and is_writable(path):
-        if is_empty(path):
-            os.rmdir(path)
-        else:
-            empty(path)
-            os.rmdir(path)
+    # if is_dir(path) and is_writable(path):
+    if is_dir(path):
+        try:
+            shutil.rmtree(path, onerror=lambda func, path, _: (os.chmod(path, S_IWRITE), func(path)))
+        except Exception as e:
+            pass
         return not is_dir(path)
+    return False
 
 def empty(path: str) -> bool:
     """
@@ -65,15 +68,25 @@ def empty(path: str) -> bool:
 
     :param path: The path to the directory.
     :type path: str
-    :return: True if the directory was emptied successfully
+    :return: True if the directory was emptied successfully. False otherwise.
+    :rtype: bool
     """
-    if str.is_path(path) and is_dir(path) and is_writable(path):
-        for root, dirs, files in os.walk(path):
-            for f in files:
-                os.unlink(os.path.join(root, f))
-            for d in dirs:
-                shutil.rmtree(os.path.join(root, d))
+    # if is_dir(path) and is_writable(path):
+    if is_dir(path):
+        try:
+            # Loop through all items in the directory
+            for item in os.listdir(path):
+                item_path = os.path.join(path, item)
+                # If it's a file and remove it
+                if os.path.isfile(item_path):
+                    os.unlink(item_path)
+                # If it's a directory and remove it recursively
+                elif os.path.isdir(item_path):
+                    shutil.rmtree(item_path)
+        except Exception as e:
+            pass
         return is_empty(path)
+    return False
 
 def rename(path: str, new_path: str) -> str:
     """
@@ -87,10 +100,13 @@ def rename(path: str, new_path: str) -> str:
     :type path: str
     :param new_path: The new path to the directory.
     :type new_path: str
-    :return: The path to the renamed directory.
+    :return: The path to the renamed directory, if success. None otherwise.
+    :rtype: str
     """
-    if (str.is_path(path) and is_dir(path)
-            and is_writable(path) and not is_dir(new_path)):
+    # if is_dir(path) and is_writable(path):
+    if is_dir(path):
+        if is_dir(new_path):
+            new_path = get_duplicated_path(new_path)
         os.rename(path, new_path)
         if is_dir(new_path):
             return new_path
@@ -108,9 +124,11 @@ def copy(path: str, new_path: str) -> str:
     :type path: str
     :param new_path: The new path to the directory.
     :type overwrite: bool
-    :return: The path to the copied directory.
+    :return: The path to the copied directory, if success. None otherwise.
+    :rtype: str
     """
-    if str.is_path(path) and is_dir(path) and is_writable(path):
+    # if is_dir(path) and is_writable(path):
+    if is_dir(path):
         if is_dir(new_path):
             new_path = get_duplicated_path(new_path)
         shutil.copytree(path, new_path)
@@ -128,50 +146,43 @@ def duplicate(path: str) -> str:
 
     :param path: The path to the directory.
     :type path: str
-    :return: The path to the duplicated directory.
+    :return: The path to the duplicated directory, if success. None otherwise.
+    :rtype: str
     """
-    if str.is_path(path) and is_dir(path) and is_writable(path):
+    if is_dir(path):
         new_path = get_duplicated_path(path)
         if copy(path, new_path) and is_dir(new_path):
             return new_path
 
-def get_duplicated_path(path_to_duplicate) -> str:
+def get_duplicated_path(path) -> str:
     """
-    Method to get a duplicated path, if exists.
+    Method to get a duplicated path
     If the path is duplicated add a sequential number to the original name, in a Windows style (1), (2), etc.
 
     *Examples:*
 
     >>> get_duplicated_path('C:\\Users\\User\\Desktop\\directory') # returns 'C:\\Users\\User\\Desktop\\directory (1)'
 
-    :param path: The path to the directory.
+    :param path: The path to an existing directory.
     :type path: str
-    :return: The duplicated path.
+    :return: The path to be used as new_path for duplicating the directory.
+    :rtype: str
     """
-    # Set new_path
-    if sys.platform.startswith('win'):
-        path = ntpath.dirname(path_to_duplicate)
-        name1 = ntpath.basename(path_to_duplicate)
-    else:
-        path = os.path.dirname(path_to_duplicate)
-        name1 = os.path.basename(path_to_duplicate)
-    n = 1
-    # If new_path exists, add a sequential number, in a Windows style (1), (2), etc.
-    # If "nuevo nombre (1)" exists, try with "nuevo nombre (2)", etc.
-    # Ends with (n)
-    if name1.endswith(" (" + str(n) + ")"):
-        # Get sequential number
-        n = int(name1.split(" (")[-1].split(")")[0])
-        # Get name without sequential number
-        name2 = name1.split(" (")[0].strip()
-        while name1.endswith(" (" + str(n) + ")"):
-            n += 1
-        new_name = os.path.join(path, f"{name2} ({n})")
-        return new_name
-    # Doesn't end with (n)
-    else:
-        new_name = os.path.join(path, f"{name1} ({1})")
-        return new_name
+    path1 = get_absolute_path(path)
+    path = os.path.dirname(path)
+    name = os.path.basename(path)
+    if is_dir(path):
+        # Check input parameters
+        # Split parts of the new_path
+        path = os.path.dirname(path1)
+        name = os.path.basename(path1)
+        sequential_number = 1
+        # If new_path exists, add a sequential number, in a Windows style (1), (2), etc.
+        while os.path.exists(os.path.join(path, name + f" ({sequential_number})")):
+            sequential_number += 1
+        # Add sequential number to the name
+        new_path = os.path.join(path, name + f" ({sequential_number})")
+        return new_path
 
 def move(path, new_path: str) -> bool:
     """
@@ -186,10 +197,65 @@ def move(path, new_path: str) -> bool:
     :type path: str
     :param new_path: The new dir path to the directory.
     :type new_path: str
-    :return: True if the directory was moved successfully
+    :return: True if the directory was moved successfully. False otherwise.
+    :rtype: bool
     """
-    if (str.is_path(path) and is_dir(path)
-            and is_writable(path) and not is_dir(new_path)):
+    # if (is_dir(path) and is_writable(path)
+    if (is_dir(path)
+            and not is_dir(new_path)):
         if copy(path, new_path):
             delete(path)
             return is_dir(new_path)
+    return False
+
+def set_hidden(path: str) -> bool:
+    """
+    Method to hide dir, return True if success
+
+    *Examples:*
+
+    >>> set_hidden('C:\\Users\\User\\Desktop\\directory') # returns True
+
+    :param path: The path to the directory.
+    :type path: str
+    :return: True if the directory is set hidden successfully. False otherwise.
+    :rtype: bool
+    """
+    # if is_dir(path) and is_writable(path):
+    if is_dir(path):
+        if is_hidden(path):
+            return True
+        else:
+            if sys.platform.startswith('win'):    # windows
+                os.system("attrib +h " + path)
+            else:                                 # linux
+                # fusionate dir path + . + dir name
+                os.rename(path, get_parent_dir(path) + "/." + get_name(path))
+        return is_hidden(path)
+    return False
+
+def set_visible(path: str) -> bool:
+    """
+    Method to unhide dir, return True if success
+
+    *Examples:*
+
+    >>> set_visible('C:\\Users\\User\\Desktop\\directory') # returns True
+
+    :param path: The path to the directory.
+    :type path: str
+    :return: True if the directory is set visible successfully. False otherwise.
+    :rtype: bool
+    """
+    # if is_dir(path) and is_writable(path):
+    if is_dir(path):
+        if not is_hidden(path):
+            return True
+        else:
+            if sys.platform.startswith('win'):    # windows
+                os.system("attrib -h " + path)
+            else:                                 # linux
+                # fusionate dir path + . + dir name
+                os.rename(path, get_parent_dir(path) + "/" + get_name(path)[1:])
+        return is_visible(path)
+    return False

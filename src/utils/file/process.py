@@ -4,18 +4,21 @@ This file contains functions for processing files.
 
 # Importing the required libraries
 import os
+import sys
 import shutil
 import datetime as dt
-import utils.string.validate as str
-import utils.directory.validate as dir
-from utils.file.validate import is_file
-from utils.file.info import get_absolute_path, get_parent_dir, get_extension, get_name
+import src.utils.string.validate as stvl
+from src.utils.file.validate import is_file, is_hidden, is_readonly  # , is_readonly, is_writable
+from src.utils.file.info import get_parent_dir, get_filename, get_absolute_path
+from src.utils.file.info import get_extension, get_filename, get_filename_w_ext
+from src.utils.directory.validate import is_dir
+from stat import S_IREAD
 
 # Constants
 DEFAULT_ENCODING = "utf-8"
 DEFAULT_TIMESTAMP_FORMAT = "%Y%m%d-%H%M%S"
 
-# Basic file operations
+# Operations about existence / content
 
 def create(path: str) -> bool:
     """
@@ -28,11 +31,12 @@ def create(path: str) -> bool:
     :param path: The path to the file.
     :type path: str
     :return: True if the file was created, False otherwise.
+    :rtype: bool
     """
-    path = get_absolute_path(path)
     if not is_file(path):
-        open(path, 'w', DEFAULT_ENCODING).close()
+        open(path, 'w+', encoding="UTF-8").close()
         return True
+    return False
 
 def delete(path: str) -> bool:
     """
@@ -45,11 +49,14 @@ def delete(path: str) -> bool:
     :param path: The path to the file.
     :type path: str
     :return: True if the file was deleted, False otherwise.
+    :rtype: bool
     """
     path = get_absolute_path(path)
-    if is_file(path):
+    # if is_file(path) and not is_readonly(path) and is_writable(path):
+    if is_file(path) and not is_readonly(path):
         os.remove(path)
         return True
+    return False
 
 def read(path: str) -> str:
     """
@@ -62,10 +69,13 @@ def read(path: str) -> str:
     :param path: The path to the file.
     :type path: str
     :return: The content of the file as a string.
+    :rtype: str
     """
     path = get_absolute_path(path)
+    # if is_file(path) and is_readable(path):
     if is_file(path):
-        return open(path, 'r', DEFAULT_ENCODING).read()
+        return open(path, 'r+', encoding="utf-8").read()
+    return False
 
 def write(path: str, content: str) -> bool:
     """
@@ -78,11 +88,14 @@ def write(path: str, content: str) -> bool:
     :param path: The path to the file.
     :type path: str
     :return: True if the content was written to the file, False otherwise.
+    :rtype: bool
     """
     path = get_absolute_path(path)
-    if is_file(path):
-        open(path, 'w', DEFAULT_ENCODING).write(content)
+    # if is_file(path) and not is_readonly(path) and is_writable(path):
+    if is_file(path) and not is_readonly(path):
+        open(path, 'w+', encoding="utf-8").write(content)
         return True
+    return False
 
 def append(path: str, content: str) -> bool:
     """
@@ -95,11 +108,14 @@ def append(path: str, content: str) -> bool:
     :param path: The path to the file.
     :type path: str
     :return: True if the content was appended to the file, False otherwise.
+    :rtype: bool
     """
     path = get_absolute_path(path)
-    if is_file(path):
-        open(path, 'a', DEFAULT_ENCODING).write(content)
+    # if is_file(path) and not is_readonly(path) and is_writable(path):
+    if is_file(path) and not is_readonly(path):
+        open(path, 'a+', encoding="utf-8").write(content)
         return True
+    return False
 
 def empty(path: str) -> bool:
     """
@@ -112,11 +128,14 @@ def empty(path: str) -> bool:
     :param path: The path to the file.
     :type path: str
     :return: True if the file was emptied, False otherwise.
+    :rtype: bool
     """
     path = get_absolute_path(path)
-    if is_file(path):
-        open(path, 'w', DEFAULT_ENCODING).close()
+    # if is_file(path) and not is_readonly(path) and is_writable(path):
+    if is_file(path) and not is_readonly(path):
+        open(path, 'w+', encoding="utf-8").close()
         return True
+    return False
 
 def rename(path: str, new_path: str) -> str:
     """
@@ -131,12 +150,16 @@ def rename(path: str, new_path: str) -> str:
     :param new_path: The new path to the file.
     :type new_path: str
     :return: The path to the renamed file.
+    :rtype: str
     """
     path = get_absolute_path(path)
-    new_path = get_absolute_path(new_path)
-    if (is_file(path)
-        and str.is_path(new_path)
-            and not is_file(new_path)):
+
+    if not stvl.is_path(new_path) and stvl.is_filename(new_path):
+        new_path = get_parent_dir(path) + "\\" + new_path
+
+    # if (is_file(path) and not is_readonly(path) and is_writable(path)
+    if (is_file(path) and not is_readonly(path)
+            and stvl.is_path(new_path) and not is_file(new_path)):
         os.rename(path, new_path)
     if is_file(new_path):
         return new_path
@@ -157,6 +180,7 @@ def copy(path: str, new_path: str) -> str:
     :param new_path: The path to the new file.
     :type new_path: str
     :return: The path to the copied file.
+    :rtype: str
     """
     path = get_absolute_path(path)
     if is_file(new_path):
@@ -164,7 +188,7 @@ def copy(path: str, new_path: str) -> str:
     else:
         new_path = get_absolute_path(new_path)
     if (is_file(path)
-        and str.is_path(new_path)
+        and stvl.is_path(new_path)
             and not is_file(new_path)):
         shutil.copy(path, new_path)
     if is_file(new_path):
@@ -182,6 +206,7 @@ def duplicate(path: str) -> str:
     :param path: The path to the file to duplicate.
     :type path: str
     :return: The path to the duplicated file.
+    :rtype: str
     """
     path = get_absolute_path(path)
     new_path = get_duplicated_path(path)
@@ -193,29 +218,35 @@ def duplicate(path: str) -> str:
 
 def get_duplicated_path(path) -> str:
     """
-    Method to get duplicated path of a file.
-    If the path is duplicated add a sequential number to the original name, in a Windows style (1), (2), etc.
+    Method to get the a path so a file can be duplicated
+    without overwriting the original file.
+
+    If the new_path exists, add a sequential number to the original name
+    , in a Windows style (1), (2), etc.
 
     *Examples:*
 
     >>> get_duplicated_path('C:\\Users\\User\\Desktop\\file.txt') # returns 'C:\\Users\\User\\Desktop\\file (1).txt'
 
-    :param path: The path to the file.
+    :param path: The path to an existing file.
     :type path: str
-    :return: The path with the duplicated name, to be used as new_path if copying or moving the file.
+    :return: The path to be used as new_path for duplicating the file.
+    :rtype: str
     """
-    # Check input parameters
     path1 = get_absolute_path(path)
-    # Split parts of new_path
-    path = os.path.dirname(path1)
-    name = os.path.basename(path1)
-    extension = os.path.splitext(name)[1]
-    sequential_number = 1
-    # If new_path exists, add a sequential number, in a Windows style (1), (2), etc.
-    while os.path.exists(os.path.join(path, name + f" ({sequential_number})" + extension)):
-        sequential_number += 1
-    # Add sequential number to the name
-    return os.path.join(path, name + f" ({sequential_number})" + extension)
+    if is_file(path):
+        # Check input parameters
+        # Split parts of new_path
+        path = os.path.dirname(path1)
+        name = get_filename_w_ext(path1)
+        extension = '.' + get_extension(path1)
+        sequential_number = 1
+        # If new_path exists, add a sequential number, in a Windows style (1), (2), etc.
+        while os.path.exists(os.path.join(path, name + f" ({sequential_number})" + extension)):
+            sequential_number += 1
+        # Add sequential number to the name
+        new_path = os.path.join(path, name + f" ({sequential_number})" + extension)
+        return new_path
 
 def archive(path: str) -> str:
     """
@@ -230,12 +261,13 @@ def archive(path: str) -> str:
     :param path: The path to the file.
     :type path: str
     :return: The path to the archived file, with a timestamp in given format.
+    :rtype: str
     """
     path = get_absolute_path(path)
     if is_file(path):
         # Get the timestamp
         timestamp = dt.datetime.now().strftime(DEFAULT_TIMESTAMP_FORMAT)
-        new_name = get_name(path) + "-" + timestamp + get_extension(path)
+        new_name = get_filename(path) + "-" + timestamp + get_extension(path)
         new_path = os.path.join(get_parent_dir(path), new_name)
         # Create a copy of the file with a timestamp
         copy(path, new_path)
@@ -258,11 +290,12 @@ def move(path, new_dir: str, overwrite=False) -> str:
     :param new_dir: The path to the directory to move the file to.
     :type path: str
     :return: The path to the moved file.
+    :rtype: str
     """
     path = get_absolute_path(path)
     new_dir = get_absolute_path(new_dir)
-    if is_file(path) and str.is_dir(new_dir):
-        new_path = os.path.join(new_dir, get_name(path) + get_extension(path))
+    if is_file(path) and is_dir(new_dir):
+        new_path = os.path.join(new_dir, get_filename(path) + get_extension(path))
         if is_file(new_path):
             if overwrite:
                 delete(new_path)
@@ -271,4 +304,73 @@ def move(path, new_dir: str, overwrite=False) -> str:
         shutil.move(path, new_path)
         return new_path
 
-# def display_info(path: str) -> bool:
+# Operations about setting attributes
+
+def set_hidden(path: str) -> bool:
+    """
+    Method to hide file, return True if success
+
+    *Examples:*
+
+    >>> set_hidden('C:\\Users\\User\\Desktop\\file.txt') # returns True
+
+    :param path: The path to the file.
+    :type path: str
+    :return: True if the file was hidden successfully
+    :rtype: bool
+    """
+    # if is_file(path) and not is_readonly(path) and is_writable(path):
+    if is_file(path) and not is_readonly(path):
+        if is_hidden(path):
+            return True
+        else:
+            if sys.platform.startswith('win'):    # windows
+                os.system("attrib +h " + path)
+            else:                                 # linux
+                # fusionate dir path + . + dir name
+                os.rename(path, get_parent_dir(path) + "/." + get_filename(path))
+            return is_hidden(path)
+    return False
+
+def set_visible(path: str) -> bool:
+    """
+    Method to unhide file, return True if success
+
+    *Examples:*
+
+    >>> set_visible('C:\\Users\\User\\Desktop\\file.txt') # returns True
+
+    :param path: The path to the file.
+    :type path: str
+    :return: True if the file is set visible successfully
+    :rtype: bool
+    """
+    # if is_file(path) and not is_readonly(path) and is_writable(path):
+    if is_file(path) and not is_readonly(path):
+        if not is_hidden(path):
+            return True
+        if sys.platform.startswith('win'):    # windows
+            os.system("attrib -h " + path)
+        else:                                 # linux
+            # fusionate dir path + . + dir name
+            os.rename(path, get_parent_dir(path) + "/" + get_filename(path)[1:])
+        return not is_hidden(path)
+    return False
+
+def set_readonly(path: str) -> bool:
+    """
+    Method to set file as readonly, return True if success
+
+    *Examples:*
+
+    >>> set_readonly('C:\\Users\\User\\Desktop\\file.txt') # returns True
+
+    :param path: The path to the file.
+    :type path: str
+    :return: True if the file was set as readonly successfully
+    :rtype: bool
+    """
+    if is_file(path) and not is_readonly(path):
+        os.chmod(path, S_IREAD)
+        return is_readonly(path)
+    return False

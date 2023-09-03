@@ -6,9 +6,9 @@ This file contains functions for obtaining information about a directory.
 import os
 import sys
 import datetime as dt
-import utils.file.info as fil
-from utils.directory.validate import is_dir, is_hidden
-from utils.directory.info import get_absolute_path, get_parent_dir, get_name
+import src.utils.file.info as fil
+from src.utils.file.validate import is_file
+from .validate import is_dir, is_hidden # , is_writable
 
 # Get information about a directory
 
@@ -23,6 +23,7 @@ def get_size(path: str) -> int:
     :param path: The path to the directory.
     :type path: str
     :return: The size of the directory in bytes.
+    :rtype: int
     """
     if is_dir(path):
         return sum(os.path.getsize(os.path.join(path, f)) for f in os.listdir(path))
@@ -38,6 +39,7 @@ def get_name(path: str) -> str:
     :param path: The path to the directory.
     :type path: str
     :return: The name of the directory.
+    :rtype: str
     """
     if is_dir(path):
         return os.path.basename(path)
@@ -53,6 +55,7 @@ def get_relative_path(path: str) -> str:
     :param path: The path to the directory.
     :type path: str
     :return: The relative path of the directory.
+    :rtype: str
     """
     if is_dir(path):
         return os.path.relpath(path)
@@ -68,6 +71,7 @@ def get_absolute_path(path: str) -> str:
     :param path: The path to the directory.
     :type path: str
     :return: The absolute path of the directory.
+    :rtype: str
     """
     if is_dir(path):
         return os.path.abspath(path)
@@ -83,6 +87,7 @@ def get_parent_dir(path: str) -> str:
     :param path: The path to the directory.
     :type path: str
     :return: The directory path of the directory.
+    :rtype: str
     """
     if is_dir(path):
         return os.path.dirname(path)
@@ -98,9 +103,10 @@ def get_creation_datetime(path: str) -> dt.datetime:
     :param path: The path to the directory.
     :type path: str
     :return: The creation time of the directory.
+    :rtype: dt.datetime
     """
     if is_dir(path):
-        return os.path.getctime(path)
+        return dt.datetime.fromtimestamp(os.path.getctime(path))
 
 def get_modification_datetime(path: str) -> dt.datetime:
     """
@@ -113,9 +119,10 @@ def get_modification_datetime(path: str) -> dt.datetime:
     :param path: The path to the directory.
     :type path: str
     :return: The modification time of the directory.
+    :rtype: dt.datetime
     """
     if is_dir(path):
-        return os.path.getmtime(path)
+        return dt.datetime.fromtimestamp(os.path.getmtime(path))
 
 def get_access_datetime(path: str) -> dt.datetime:
     """
@@ -128,13 +135,16 @@ def get_access_datetime(path: str) -> dt.datetime:
     :param path: The path to the directory.
     :type path: str
     :return: The access time of the directory.
+    :rtype: dt.datetime
     """
     if is_dir(path):
-        return os.path.getatime(path)
+        return dt.datetime.fromtimestamp(os.path.getatime(path))
 
 def get_owner(path: str) -> str:
     """
     Gets the owner of a directory.
+
+    @TODO: It works for Windows. Needed testing for other SOs.
 
     *Examples:*
 
@@ -143,6 +153,7 @@ def get_owner(path: str) -> str:
     :param path: The path to the directory.
     :type path: str
     :return: The owner of the directory.
+    :rtype: str
     """
     if is_dir(path):
         if sys.platform.startswith('linux') or sys.platform.startswith('darwin'):
@@ -157,7 +168,11 @@ def get_owner(path: str) -> str:
 
 def get_group(path: str) -> str:
     """
-    Gets the group of a directory.
+    Gets the groups of the user who owns the directory.
+    Get the owner of a directory first with get_owner()
+    and then get all the groups of that user.
+
+    @TODO: This function doesn't work as expected (only tested in Windows).
 
     *Examples:*
 
@@ -166,65 +181,85 @@ def get_group(path: str) -> str:
     :param path: The path to the directory.
     :type path: str
     :return: The group of the directory.
+    :rtype: str
     """
     if is_dir(path):
+        # os.getgrouplist() returns a list of group ids for a user
         if sys.platform.startswith('linux') or sys.platform.startswith('darwin'):
             import grp
             return grp.getgrgid(os.stat(path).st_gid).gr_name
         elif sys.platform.startswith('win'):
             import win32security
-            sd = win32security.GetFileSecurity(path, win32security.GROUP_SECURITY_INFORMATION)
-            owner_sid = sd.GetSecurityDescriptorGroup()
+            # Get the owner of a directory first with get_owner()
+            sd = win32security.GetFileSecurity(path, win32security.OWNER_SECURITY_INFORMATION)
+            owner_sid = sd.GetSecurityDescriptorOwner()
+            # Get all the groups of that user.
             name, domain, type = win32security.LookupAccountSid(None, owner_sid)
-            return name
 
-def get_content(path: str, hidden=False) -> list:
+def get_contents(path: str, hidden=False) -> list:
     """
     Gets the content of a directory.
 
     *Examples:*
 
-    >>> get_content('C:\\Users\\User\\Desktop\\') # returns ['file1.txt', 'file2.txt', 'file3.txt']
-    >>> get_content('C:\\Users\\User\\Desktop\\', hidden=True) # returns ['file1.txt', 'file2.txt', 'file3.txt', '.file4.txt']
+    >>> get_content('C:\\Users\\User\\Desktop\\')              # returns ['file.txt', '\\dir_inside\file.txt']
+    >>> get_content('C:\\Users\\User\\Desktop\\', hidden=True) # returns ['file.txt', 'hidden_file.txt', 'hidden_dir', '\\dir_inside\file.txt', '\\dir_inside\hidden_file.txt']
 
     :param path: The path to the directory.
     :param hidden: Whether to include hidden files or not.
     :type path: str
     :return: The content of the directory.
+    :rtype: list
     """
-    # if sys.platform.startswith('linux') or sys.platform.startswith('darwin'):
-    #     if hidden:
-    #         return os.listdir(path)
-    #     else:
-    #         return [x for x in os.listdir(path) if not x.startswith('.')]
-    # elif sys.platform.startswith('win'):
-    #     if hidden:
-    #         return os.listdir(path)
-    #     else:
-    #         return [x for x in os.listdir(path) if not x.startswith('.')]
     if is_dir(path):
-        tree = []
-        if hidden:   # all content (hidden and not hidden)
-            for root, dirs, files in os.walk(path):
-                tree.append(root)
-                for d in dirs:
-                    tree.append(d)
-                for f in files:
-                    tree.append(f)
+        items = []
+        # Recorre el directorio y sus subdirectorios
+        for item in os.scandir(path):
+            if is_dir(item):
+                # If it's a directory, get the contents
+                items.extend(get_contents(item.path, hidden))
+            elif is_file(item):
+                # If it's a file, append it to the list
+                items.append(item.path)
 
-        else:        # all non-hidden content
-            for root, dirs, files in os.walk(path):
-                if not is_hidden(root):
-                    tree.append(root)
-                for d in dirs:
-                    if not is_hidden(d):
-                        tree.append(d)
-                for f in files:
-                    if not is_hidden(f):
-                        tree.append(f)
-        return tree
+        return items
 
-def get_content_with_size(path: str, hidden=False) -> list:
+        # if sys.platform.startswith('linux') or sys.platform.startswith('darwin'):
+        #     if hidden:
+        #         return os.listdir(path)
+        #     else:
+        #         return [x for x in os.listdir(path) if not x.startswith('.')]
+        # elif sys.platform.startswith('win'):
+        #     if hidden:
+        #         return os.listdir(path)
+        #     else:
+        #         return [x for x in os.listdir(path) if not x.startswith('.')]
+        # tree = []
+        # if hidden:   # all content (hidden and not hidden)
+        #     for root, dirs, files in os.walk(path):
+        #         # tree.append(root)
+        #         for d in dirs:
+        #             d = os.path.join(root, d)
+        #             tree.append(d)
+        #         for f in files:
+        #             f = os.path.join(root, f)
+        #             tree.append(f)
+
+        # else:        # all non-hidden content
+        #     for root, dirs, files in os.walk(path):
+        #         # if not is_hidden(root):
+        #         #     tree.append(root)
+        #         for d in dirs:
+        #             d = os.path.join(root, d)
+        #             if not is_hidden(d):
+        #                 tree.append(d)
+        #         for f in files:
+        #             f = os.path.join(root, f)
+        #             if not is_hidden(f):
+        #                 tree.append(f)
+        # return tree
+
+def get_contents_with_size(path: str, hidden=False) -> list:
     """
     Gets the content of a directory with the size of each file.
 
@@ -237,6 +272,7 @@ def get_content_with_size(path: str, hidden=False) -> list:
     :param hidden: Whether to include hidden files or not.
     :type path: str
     :return: The content of the directory with the size of each file.
+    :rtype: list
     """
     if is_dir(path):
         tree = []
@@ -264,7 +300,7 @@ def get_content_with_size(path: str, hidden=False) -> list:
                                      fil.get_size(f)))
         return tree
 
-def get_content_with_size_type(path: str, hidden=False) -> list:
+def get_contents_with_size_type(path: str, hidden=False) -> list:
     """
     Gets the content of a directory with the size and type of each file.
 
@@ -277,6 +313,7 @@ def get_content_with_size_type(path: str, hidden=False) -> list:
     :param hidden: Whether to include hidden files or not.
     :type path: str
     :return: The content of the directory with the size and type of each file.
+    :rtype: list
     """
     if is_dir(path):
         tree = []
@@ -308,7 +345,7 @@ def get_content_with_size_type(path: str, hidden=False) -> list:
                                      fil.get_extension(f)))
         return tree
 
-def get_content_with_size_type_date(path: str, hidden=False) -> list:
+def get_contents_with_size_type_date(path: str, hidden=False) -> list:
     """
     Gets the content of a directory with the size, type and date of each file.
 
@@ -321,6 +358,7 @@ def get_content_with_size_type_date(path: str, hidden=False) -> list:
     :param hidden: Whether to include hidden files or not.
     :type path: str
     :return: The content of the directory with the size, type and date of each file.
+    :rtype: list
     """
     if is_dir(path):
         tree = []
