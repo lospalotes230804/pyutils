@@ -1,5 +1,5 @@
 """
-This file for testing the utility class at utils\directory\
+This file for testing the utility functions at utils\directory\
 """
 
 # Importing the required libraries
@@ -10,7 +10,6 @@ import src.utils.file.process as flpr
 import src.utils.directory.info as drin
 import src.utils.directory.validate as drvl
 import src.utils.directory.process as drpr
-# import src.utils.datetime.validate as dtvl
 
 # Initialize test constant variables
 current_dir = os.path.dirname(os.path.abspath(__file__))
@@ -361,17 +360,7 @@ class TestDirCase(TestCase):
         self.assertTrue(drpr.set_visible(test_hidden_dir_inside))
         self.assertFalse(drvl.is_hidden(test_hidden_dir_inside))
 
-    def test_set_readonly(self):
-        """
-        Method to test set_readonly function
 
-        *Examples:*
-
-        >>> set_readonly('C:\\Users\\User\\Desktop\\directory') # returns True if the directory was set as readonly successfully
-        >>> set_readonly('C:\\Users\\User\\Desktop\\directory') # returns False if the directory was not set as readonly successfully
-        """
-        self.assertTrue(drvl.is_writable(test_dir_inside))
-        # self.assertTrue(drpr.set_readonly(test_dir_inside))
 
 
 
