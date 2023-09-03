@@ -210,6 +210,3 @@ def is_visible(path: str) -> bool:
     # # check if directory is writable for linux
     # elif sys.platform.startswith('linux'):
     #     return os.access(path, os.W_OK)
-
-
-

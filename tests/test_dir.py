@@ -200,18 +200,24 @@ class TestDirCase(TestCase):
 
         *Examples:*
 
-        >>> get_content('C:\\Users\\User\\Desktop\\')              # returns ['file.txt', '\\dir_inside\file.txt']
-        >>> get_content('C:\\Users\\User\\Desktop\\', hidden=True) # returns ['file.txt', 'hidden_file.txt', 'hidden_dir', '\\dir_inside\file.txt', '\\dir_inside\hidden_file.txt']
+        >>> get_content('C:\\Users\\User\\Desktop\\', hidden=True) # returns [
+                'test_dir_inside',
+                'test_hidden_dir_inside',
+                'test_file_inside.txt',
+                'test_hidden_file_inside.txt',
+                'test_dir_inside\\test_file_inside.txt',
+                'test_hidden_dir_inside\\test_hidden_file_inside.txt'
+            ]
         """
         # Test get_contents function with hidden files and directories
         dir_contents = drin.get_contents(test_dir, True)
         self.assertEqual(dir_contents, [
-            os.path.join(test_dir, "test_file_inside.txt"),
-            os.path.join(test_dir, "test_hidden_dir_inside"),
-            os.path.join(test_dir, "test_hidden_file_inside.txt"),
-            os.path.join(test_dir, "test_dir_inside"),
-            os.path.join(test_dir, "test_dir_inside\\test_file_inside.txt"),
-            os.path.join(test_dir, "test_hidden_dir_inside\\test_hidden_file_inside.txt")
+            os.path.join(os.path.relpath(test_dir), "test_dir_inside"),
+            os.path.join(os.path.relpath(test_dir), "test_hidden_dir_inside"),
+            os.path.join(os.path.relpath(test_dir), "test_file_inside.txt"),
+            os.path.join(os.path.relpath(test_dir), "test_hidden_file_inside.txt"),
+            os.path.join(os.path.relpath(test_dir), "test_dir_inside\\test_file_inside.txt"),
+            os.path.join(os.path.relpath(test_dir), "test_hidden_dir_inside\\test_hidden_file_inside.txt")
         ])
 
     def test_get_creation_datetime(self):

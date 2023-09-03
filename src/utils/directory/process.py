@@ -6,7 +6,6 @@ This file contains functions for processing directories.
 import os
 import sys
 import shutil
-import ntpath
 import src.utils.string.validate as str
 from .validate import is_dir, is_empty, is_hidden, is_visible  # , is_readonly, is_writable
 from .info import get_absolute_path, get_parent_dir, get_name

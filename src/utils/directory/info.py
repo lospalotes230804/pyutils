@@ -8,7 +8,7 @@ import sys
 import datetime as dt
 import src.utils.file.info as fil
 from src.utils.file.validate import is_file
-from .validate import is_dir, is_hidden # , is_writable
+from .validate import is_dir, is_hidden  # , is_writable
 
 # Get information about a directory
 
@@ -196,14 +196,24 @@ def get_group(path: str) -> str:
             # Get all the groups of that user.
             name, domain, type = win32security.LookupAccountSid(None, owner_sid)
 
-def get_contents(path: str, hidden=False) -> list:
+def get_contents(directory, hidden=False):
     """
-    Gets the content of a directory.
+    Gets the contents of a directory.
+    Recursively gets the contents of the subdirectories.
+    Returns a list with the relative paths of directories and files.
+
+    @TODO: This function doesn't work as expected (only tested in Windows).
 
     *Examples:*
 
-    >>> get_content('C:\\Users\\User\\Desktop\\')              # returns ['file.txt', '\\dir_inside\file.txt']
-    >>> get_content('C:\\Users\\User\\Desktop\\', hidden=True) # returns ['file.txt', 'hidden_file.txt', 'hidden_dir', '\\dir_inside\file.txt', '\\dir_inside\hidden_file.txt']
+    >>> get_content('C:\\Users\\User\\Desktop\\', hidden=True) # returns [
+            'test_dir_inside',
+            'test_hidden_dir_inside',
+            'test_file_inside.txt',
+            'test_hidden_file_inside.txt',
+            'test_dir_inside\\test_file_inside.txt',
+            'test_hidden_dir_inside\\test_hidden_file_inside.txt'
+        ]
 
     :param path: The path to the directory.
     :param hidden: Whether to include hidden files or not.
@@ -211,53 +221,16 @@ def get_contents(path: str, hidden=False) -> list:
     :return: The content of the directory.
     :rtype: list
     """
-    if is_dir(path):
-        items = []
-        # Recorre el directorio y sus subdirectorios
-        for item in os.scandir(path):
-            if is_dir(item):
-                # If it's a directory, get the contents
-                items.extend(get_contents(item.path, hidden))
-            elif is_file(item):
-                # If it's a file, append it to the list
-                items.append(item.path)
-
-        return items
-
-        # if sys.platform.startswith('linux') or sys.platform.startswith('darwin'):
-        #     if hidden:
-        #         return os.listdir(path)
-        #     else:
-        #         return [x for x in os.listdir(path) if not x.startswith('.')]
-        # elif sys.platform.startswith('win'):
-        #     if hidden:
-        #         return os.listdir(path)
-        #     else:
-        #         return [x for x in os.listdir(path) if not x.startswith('.')]
-        # tree = []
-        # if hidden:   # all content (hidden and not hidden)
-        #     for root, dirs, files in os.walk(path):
-        #         # tree.append(root)
-        #         for d in dirs:
-        #             d = os.path.join(root, d)
-        #             tree.append(d)
-        #         for f in files:
-        #             f = os.path.join(root, f)
-        #             tree.append(f)
-
-        # else:        # all non-hidden content
-        #     for root, dirs, files in os.walk(path):
-        #         # if not is_hidden(root):
-        #         #     tree.append(root)
-        #         for d in dirs:
-        #             d = os.path.join(root, d)
-        #             if not is_hidden(d):
-        #                 tree.append(d)
-        #         for f in files:
-        #             f = os.path.join(root, f)
-        #             if not is_hidden(f):
-        #                 tree.append(f)
-        # return tree
+    contents = []
+    for root, dirs, files in os.walk(directory):
+        if not hidden:
+            dirs[:] = [d for d in dirs if not d.startswith('.')]
+            files = [f for f in files if not f.startswith('.')]
+        for dir in dirs:
+            contents.append(os.path.join(os.path.relpath(root), dir))
+        for file in files:
+            contents.append(os.path.join(os.path.relpath(root), file))
+    return contents
 
 def get_contents_with_size(path: str, hidden=False) -> list:
     """
