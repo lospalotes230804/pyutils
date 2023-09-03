@@ -263,7 +263,6 @@ class TestDirCase(TestCase):
         """
         self.assertEqual(drin.get_owner(test_dir), os.getlogin())
 
-
     # Processing functions
 
     def test_create(self):
@@ -325,7 +324,8 @@ class TestDirCase(TestCase):
         >>> copy('C:\\Users\\User\\Desktop\\directory', 'C:\\Users\\User\\Desktop\\directory') # returns False if not copied successfully
         """
         # Test copy function
-        self.assertTrue(drpr.copy(test_dir_inside, test_dir_inside.replace("\\test_dir_inside", "\\test_dir_inside_copied")))
+        self.assertTrue(drpr.copy(test_dir_inside, test_dir_inside.replace(
+            "\\test_dir_inside", "\\test_dir_inside_copied")))
 
     def test_duplicate(self):
         """
@@ -365,8 +365,3 @@ class TestDirCase(TestCase):
         self.assertTrue(drvl.is_hidden(test_hidden_dir_inside))
         self.assertTrue(drpr.set_visible(test_hidden_dir_inside))
         self.assertFalse(drvl.is_hidden(test_hidden_dir_inside))
-
-
-
-
-

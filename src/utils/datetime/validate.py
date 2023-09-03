@@ -104,12 +104,12 @@ def is_parseable(input_string: str) -> bool:
     except ValueError as e:
         print(e)
         return False
-    
+
 def str_to_datetime(input_string) -> datetime:
     """
     Converts a string into a datetime object.
     If it is not parseable, it returns None.
-    
+
     *Examples*:
 
     >>> str_to_datetime("20030925T104941.5-0300") # returns datetime.datetime(2003, 9, 25, 10, 49, 41, 500000, tzinfo=tzoffset(None, -10800))
@@ -131,7 +131,7 @@ def str_to_datetime(input_string) -> datetime:
         except ValueError as e:
             print(e)
             return None
-    
+
 def is_datetime(object) -> bool:
     """
     Checks if an object is a datetime object.
@@ -187,7 +187,7 @@ def is_past(date: datetime) -> bool:
         return date < datetime.now()
     else:
         return False
-    
+
 def is_today(date: datetime) -> bool:
     """
     Checks if a string is parseable into a datetime object.
@@ -268,7 +268,7 @@ def is_same_week(date1: datetime, date2: datetime) -> bool:
         return date1.isocalendar()[1] == date2.isocalendar()[1]
     else:
         return False
-    
+
 def is_same_month(date1: datetime, date2: datetime) -> bool:
     """
     Checks if two datetime objects are the same month.
@@ -288,7 +288,7 @@ def is_same_month(date1: datetime, date2: datetime) -> bool:
         return date1.month == date2.month
     else:
         return False
-    
+
 def is_same_year(date1: datetime, date2: datetime) -> bool:
     """
     Checks if two datetime objects are the same year.
@@ -330,11 +330,19 @@ def is_valid_range(date1: datetime, date2: datetime) -> bool:
         return date1 < date2
     else:
         return False
-    
-# def check_format(datetime_string: str, format: str) -> bool:
-    # """
-    # Checks if the given datetime string matches the specified format string.
-    # It returns True if the datetime string matches the format, and False otherwise. 
 
+def is_leap_year(year: int) -> bool:
+    """
+    Checks if a datetime object is a leap year.
 
+    *Examples*:
 
+    >>> is_leap_year(datetime(2090, 12, 31, 23, 59, 59)) # returns False
+    >>> is_leap_year(datetime(2000, 12, 31, 23, 59, 59)) # returns True
+    >>> is_leap_year(datetime.now()) # returns False
+
+    :param date: datetime object
+    :return: True if the date is a leap year, False otherwise.
+    :rtype: bool
+    """
+    return year % 4 == 0

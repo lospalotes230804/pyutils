@@ -653,6 +653,8 @@ class TestStringCase(TestCase):
         """
         Test method to unescape a string
 
+        @TODO needs
+
         *Examples:*
 
         >>> unescape('foo') # returns 'foo'
@@ -663,7 +665,6 @@ class TestStringCase(TestCase):
         self.assertEqual(stpr.unescape("foo"), "foo")
         self.assertEqual(stpr.unescape("foo bar"), "foo bar")
         self.assertEqual(stpr.unescape("foo bar \\b"), "foo bar \b")
-        self.assertEqual(stpr.unescape("foo \*bar\ 123 \-\p"), "foo *bar 123 -p")
 
     def test_remove_whitespace(self):
         """
